@@ -42,5 +42,6 @@ jobs:
 
     - name: Terraform deploy
       run: |
-        cd Aws/Terraform
+        cd Infrastructure/Shared
         terraform init -backend-config="LocalInit.tfvars"
+        terraform plan
