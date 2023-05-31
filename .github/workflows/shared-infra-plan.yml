@@ -1,0 +1,52 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Shared Infra Plan
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - ".github/workflows/shared-infra-plan.yml"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "Infrastructure/Shared/**"
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+jobs:
+  dev:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1.7.0
+      with:
+        aws-region: us-east-2
+        role-to-assume: arn:aws:iam::166165479772:role/shared-infra-github-read-role
+        role-session-name: shared-infra-github-role
+
+   
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.3.6
+
+    - name: Terraform deploy
+      run: |
+        cd Infrastructure/Shared
+        terraform init -backend-config="LocalInit.tfvars"
+        terraform plan
+        terraform apply -auto-approve
