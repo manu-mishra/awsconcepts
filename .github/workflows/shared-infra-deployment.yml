@@ -43,3 +43,4 @@ jobs:
         cd Infrastructure/Shared
         terraform init -backend-config="LocalInit.tfvars"
         terraform plan
+        terraform apply -auto-approve
