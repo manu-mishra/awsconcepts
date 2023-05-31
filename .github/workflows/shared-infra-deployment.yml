@@ -31,7 +31,7 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v1.7.0
       with:
         aws-region: us-east-2
-        role-to-assume: arn:aws:iam::639658585076:role/shared-infra-github-role
+        role-to-assume: arn:aws:iam::166165479772:role/shared-infra-github-role
         role-session-name: shared-infra-github-role
 
    
