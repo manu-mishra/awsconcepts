@@ -36,7 +36,7 @@ jobs:
       with:
         aws-region: us-east-2
         role-to-assume: arn:aws:iam::166165479772:role/shared-infra-github-read-role
-        role-session-name: shared-infra-github-role
+        role-session-name: shared-infra-github-read-role
 
    
     - name: Setup Terraform
@@ -49,4 +49,3 @@ jobs:
         cd Infrastructure/Shared
         terraform init -backend-config="LocalInit.tfvars"
         terraform plan
-        terraform apply -auto-approve
