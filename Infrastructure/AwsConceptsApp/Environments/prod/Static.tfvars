@@ -1,0 +1,6 @@
+APPLICATION_NAME = "awsconcepts"
+ENV_NAME = "prod"
+ENV_SUBDOMAIN = "www"
+APEX_DOMAIN = "awsconcepts.com"
+REGION ="us-east-1"
+STATEBUCKET = "a-us1-tf-prod-mm"

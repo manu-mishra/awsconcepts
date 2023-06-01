@@ -1,0 +1,6 @@
+APPLICATION_NAME = "awsconcepts"
+ENV_NAME = "dev"
+ENV_SUBDOMAIN = "dev"
+APEX_DOMAIN = "awsconcepts.com"
+REGION ="us-east-2"
+STATEBUCKET = "a-us1-tf-dev-mm"
