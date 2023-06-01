@@ -41,7 +41,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: lambda-api-package
-        path: lambda-api-package.zip
+        path: ./Workloads/AwsConceptsApp/Api/LambdaApi/lambda-api-package.zip
         retention-days: 2
  
   deploy-backend-dev:
