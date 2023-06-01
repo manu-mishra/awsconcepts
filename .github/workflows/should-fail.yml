@@ -4,7 +4,6 @@ on:
   push:
     branches: [ main ]
     paths:
-      - "Infrastructure/Shared/**"
       - ".github/workflows/should-fail.yml"
 permissions:
   id-token: write   # This is required for requesting the JWT

@@ -18,10 +18,6 @@ resource "aws_s3_bucket_public_access_block" "website_s3block" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
-resource "aws_s3_bucket_acl" "website-bucket-acl" {
-  bucket = aws_s3_bucket.website_bucket.id
-  acl    = "private"
-}
 resource "aws_s3_bucket_policy" "s3_cf_policy" {
   bucket = aws_s3_bucket.website_bucket.id
   policy = data.aws_iam_policy_document.s3_cf_policy.json
@@ -50,10 +46,6 @@ resource "aws_s3_bucket_public_access_block" "object_store_s3block" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
-resource "aws_s3_bucket_acl" "object_store-acl" {
-  bucket = aws_s3_bucket.object_store.id
-  acl    = "private"
-}
 
 ##############################dataLake##########################################
 resource "aws_s3_bucket" "data_lake" {
@@ -76,7 +68,4 @@ resource "aws_s3_bucket_public_access_block" "data_lake_s3block" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
-resource "aws_s3_bucket_acl" "data_lake-bucket-acl" {
-  bucket = aws_s3_bucket.data_lake.id
-  acl    = "private"
-}
+
