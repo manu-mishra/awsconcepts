@@ -15,7 +15,7 @@ module "apex-domain" {
       name = "dev",
       subdomain = "dev",
       dns_settings = {
-        ns_records = ["ns-1094.awsdns-08.org.", "ns-68.awsdns-08.com.", "ns-863.awsdns-43.net.", "ns-1980.awsdns-55.co.uk."]
+        ns_records = ["ns-71.awsdns-08.com.", "ns-993.awsdns-60.net.", "ns-1614.awsdns-09.co.uk.", "ns-1105.awsdns-10.org."]
       }
     }
   }
