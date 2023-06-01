@@ -58,7 +58,8 @@ jobs:
     - name: Terraform deploy
       run: |
         cd Infrastructure/AwsConceptsApp/Terraform
-        terraform init -backend-config="bucket=dojokyo${{ inputs.environment-name }}tfstate" -backend-config="key=infrastructure/terraform.tfstate" -backend-config="region=us-east-1"
+        terraform init -backend-config="bucket=a-us1-tf-${{ inputs.environment-name }}-mm" -backend-config="key=infrastructure/terraform.tfstate" -backend-config="region=us-east-1"
+        terraform apply -auto-approve -var-file="../Environments/${{ inputs.environment-name }}/Static.tfvars" -var-file="../Environments/${{ inputs.environment-name }}/Variables.tfvars"
         terraform apply -auto-approve -var-file="../Environments/${{ inputs.environment-name }}/Static.tfvars" -var-file="../Environments/${{ inputs.environment-name }}/Variables.tfvars"
         outputs=$(terraform output -json)
         echo "$outputs"
