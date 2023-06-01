@@ -37,7 +37,7 @@ jobs:
           node-version: "16"
       - name: replace environment file
         run: |
-          content=$(cat ../../Infrastructure/AwsConceptsApp/Environments/${{ inputs.target-environment-name  }}/Ui.env)
+          content=$(cat ../../../Infrastructure/AwsConceptsApp/Environments/${{ inputs.target-environment-name  }}/Ui.env)
           echo "$content" > .env
       - name: Installing dependencies
         run: npm install
