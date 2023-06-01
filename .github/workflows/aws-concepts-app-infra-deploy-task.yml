@@ -1,4 +1,4 @@
-name: 'aws-concepts-app-infra-deploy'
+name: 'aws-concepts-app-infra-deploy-task'
 
 on:
   workflow_call:
