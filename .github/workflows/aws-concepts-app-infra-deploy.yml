@@ -1,0 +1,31 @@
+name: 'Infrastructure-Deploy'
+
+on:
+  push:
+    paths:
+      - "Infrastructure/Terraform/**"
+      - ".github/workflows/infrastructure-deploy.yml"
+      - "Infrastructure/Environments/**"
+  workflow_dispatch :
+
+jobs:
+# Deploy to dev
+  call-workflow-terraform-deploy-dev:
+    uses: ./.github/workflows/terraform-deploy.yml
+    with:
+      environment-name: dev
+    secrets:
+      AWS_ACCESS_KEY: ${{ secrets.DEV_AWS_ACCESS_KEY }}
+      AWS_ACCESS_SECRET: ${{ secrets.DEV_AWS_SECRET_KEYS }}
+      PAT_GITHUB: ${{ secrets.PAT_TOKET_GITHUB }}
+# Deploy to prod
+  call-workflow-terraform-deploy-prod:
+    needs: call-workflow-terraform-deploy-dev
+    uses: ./.github/workflows/terraform-deploy.yml
+    with:
+      environment-name: prod
+    secrets: 
+      AWS_ACCESS_KEY: ${{ secrets.PROD_AWS_ACCESS_KEY }}
+      AWS_ACCESS_SECRET: ${{ secrets.PROD_AWS_SECRET_KEYS }}
+      PAT_GITHUB: ${{ secrets.PAT_TOKET_GITHUB }}
+ 
