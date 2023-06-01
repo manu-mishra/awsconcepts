@@ -1,0 +1,61 @@
+name: 'aws-concepts-app-infra-deploy'
+
+on:
+  workflow_call:
+    inputs:
+      environment-name:
+        description: 'envirnoment to deploy infrastructure'
+        type: string
+      build-id:
+        description: 'buildid'
+        type: string
+        default: ''
+        required: false
+    secrets:
+        AWS_ACCESS_KEY: 
+          required: true
+        AWS_ACCESS_SECRET: 
+          required: true
+
+jobs:
+  dev:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
+        aws-region: us-east-1
+
+   
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.3.6
+
+    - name: update buildid
+      if: inputs.build-id !=''
+      run: |
+        cd Infrastructure/Environments/${{ inputs.environment-name }}
+        echo -e "LAMBDA_API_BUILD_ID =\"${{ inputs.build-id }}\"\nLAMBDA_HASCODE_API = true" > Variables.tfvars
+
+    - name: Terraform deploy
+      run: |
+        cd Infrastructure/Terraform
+        terraform init -backend-config="bucket=dojokyo${{ inputs.environment-name }}tfstate" -backend-config="key=infrastructure/terraform.tfstate" -backend-config="region=us-east-1"
+        terraform apply -auto-approve -var-file="../Environments/${{ inputs.environment-name }}/Static.tfvars" -var-file="../Environments/${{ inputs.environment-name }}/Variables.tfvars"
+        outputs=$(terraform output -json)
+        echo "$outputs"
+   
