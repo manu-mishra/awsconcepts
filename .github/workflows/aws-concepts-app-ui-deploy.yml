@@ -1,0 +1,29 @@
+# Name of workflow as seen in Github actions tab
+name: app-ui-build-and-Deploy
+# Run workflow only on push to main branch
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "Ui/**"
+      - ".github/workflows/ui-deploy.yml"
+jobs:
+  # To deploy to dev
+  call-workflow-ui-deploy-to-env-dev:
+    uses: ./.github/workflows/ui-deploy-to-env.yml
+    with:
+      target-bucket-name: s3://dev.dojokyo.com
+      target-environment-name: dev
+    secrets: 
+      AWS_ACCESS_KEY: ${{ secrets.DEV_AWS_ACCESS_KEY }}
+      AWS_ACCESS_SECRET: ${{ secrets.DEV_AWS_SECRET_KEYS }}
+  # To deploy to prod
+  call-workflow-ui-deploy-to-env-prod:
+    needs: call-workflow-ui-deploy-to-env-dev
+    uses: ./.github/workflows/ui-deploy-to-env.yml
+    with:
+      target-bucket-name: s3://prod.dojokyo.com
+      target-environment-name: prod
+    secrets: 
+      AWS_ACCESS_KEY: ${{ secrets.PROD_AWS_ACCESS_KEY }}
+      AWS_ACCESS_SECRET: ${{ secrets.PROD_AWS_SECRET_KEYS }}
