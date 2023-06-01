@@ -8,7 +8,7 @@ on:
       - "Workloads/AwsConceptsApp/ui/**"
       - ".github/workflows/aws-concepts-app-ui-deploy.yml"
 jobs:
-  # To deploy to dev
+  # To deploy to dev env
   call-workflow-ui-deploy-to-env-dev:
     uses: ./.github/workflows/aws-concepts-app-ui-deploy-task.yml
     with:
