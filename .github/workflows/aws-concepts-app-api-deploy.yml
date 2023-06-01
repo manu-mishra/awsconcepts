@@ -35,6 +35,8 @@ jobs:
         cd lambda-api-package
         ls
         zip -r ../lambda-api-package.zip . 
+        cd ..
+        ls
     - name: Upload zip file to Github Artifact
       uses: actions/upload-artifact@v3
       with:
