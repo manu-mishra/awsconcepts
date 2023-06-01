@@ -64,7 +64,7 @@ jobs:
     with:
       environment-name: ${{inputs.environment-name}}
       build-id: "${{ github.run_id }}${{ github.run_attempt }}"
+      aws-region-name: ${{inputs.aws-region-name}}
     secrets: 
-      aws-region: ${{inputs.aws-region-name}}
       role-to-assume: ${{secrets.role-to-assume}}
       role-session-name: ${{secrets.role-session-name}}
