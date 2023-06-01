@@ -18,13 +18,13 @@ jobs:
     secrets:
       role-to-assume: arn:aws:iam::463216347886:role/awsc-github-role
       role-session-name: awsc-github-role
-# # Deploy to prod
-#   call-workflow-terraform-deploy-prod:
-#     needs: call-workflow-terraform-deploy-dev
-#     uses: ./.github/workflows/aws-concepts-app-infra-deploy-task.yml
-#     with:
-#       environment-name: prod
-#     secrets: 
-#       role-to-assume: arn:aws:iam::788371085266:role/awsc-github-role
-#       role-session-name: awsc-github-role
+# Deploy to prod
+  call-workflow-terraform-deploy-prod:
+    needs: call-workflow-terraform-deploy-dev
+    uses: ./.github/workflows/aws-concepts-app-infra-deploy-task.yml
+    with:
+      environment-name: prod
+    secrets: 
+      role-to-assume: arn:aws:iam::788371085266:role/awsc-github-role
+      role-session-name: awsc-github-role
  
