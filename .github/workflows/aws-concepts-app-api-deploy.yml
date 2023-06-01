@@ -53,16 +53,3 @@ jobs:
       role-to-assume: arn:aws:iam::463216347886:role/awsc-github-role
       role-session-name: awsc-github-role
       PAT_GITHUB: ${{ secrets.PAT_TOKET_GITHUB }}
-
-  # deploy-backend-prod:
-  #   name: deploy-backend-prod
-  #   needs: deploy-backend-dev
-  #   uses: ./.github/workflows/backend-deploy-task.yml
-  #   with:
-  #     environment-name: prod
-  #     build-id: ${{ github.run_id }}${{ github.run_attempt }}
-  #     artifact-lambda-api-name: lambda-api-package
-  #   secrets: 
-  #     AWS_ACCESS_KEY: ${{ secrets.PROD_AWS_ACCESS_KEY }}
-  #     AWS_ACCESS_SECRET: ${{ secrets.PROD_AWS_SECRET_KEYS }}
-  #     PAT_GITHUB: ${{ secrets.PAT_TOKET_GITHUB }}
