@@ -8,7 +8,7 @@ module "apex-domain" {
       name = "prod",
       subdomain = "www",
       dns_settings = {
-        ns_records = ["ns-332.awsdns-41.com.", "ns-1387.awsdns-45.org.", "ns-2044.awsdns-63.co.uk.", "ns-878.awsdns-45.net."]
+        ns_records = ["ns-561.awsdns-06.net.", "ns-2022.awsdns-60.co.uk.", "ns-420.awsdns-52.com.", "ns-1086.awsdns-07.org."]
       }
     },
     "dev" = {
