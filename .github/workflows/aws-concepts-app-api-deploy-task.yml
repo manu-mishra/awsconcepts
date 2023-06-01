@@ -1,0 +1,70 @@
+# Name of workflow as seen in Github actions tab
+name: aws-concepts-ui-deploy-task
+on:
+  workflow_call:
+    inputs:
+      environment-name:
+        description: 'envirnoment to deploy infrastructure'
+        type: string
+      build-id:
+        description: 'package for lambda api'
+        type: string
+      artifact-lambda-api-name:
+        description: 'package for lambda api'
+        type: string
+      aws-region-name:
+        description: 'aws region to deploy infrastructure'
+        type: string
+        default: 'us-east-1'     
+    secrets:
+      role-to-assume: 
+        required: true
+      role-session-name: 
+        required: true
+      PAT_GITHUB: 
+        required: true
+jobs:
+  prepare-artifacts:
+    name: prepare-artifacts
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checking out code
+      uses: actions/checkout@v3
+    - name: Download a artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{inputs.artifact-lambda-api-name}}
+        path: ./output/${{inputs.build-id}}
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-region: ${{inputs.aws-region-name}}
+        role-to-assume: ${{secrets.role-to-assume}}
+        role-session-name: ${{secrets.role-session-name}}
+    - name: Upload to S3 bucket
+      run: aws s3 sync ./output/ s3://a-us1-tf-${{ inputs.environment-name }}-mm/backend/lambdapackages
+
+    - name: Update Variables.tfvar
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+      run: |
+        cd ./Infrastructure/AwsConceptsApp/Environments/${{inputs.environment-name}}/ 
+        git config --local user.email "api-deploy-task@yml.com"
+        git config --local user.name "GitHub Actions api-deploy-task.yml"
+        git pull
+        echo -e "LAMBDA_API_BUILD_ID =\"${{ github.run_id }}${{ github.run_attempt }}\"\nLAMBDA_HASCODE_API = true" > Variables.tfvars
+        git add Variables.tfvars
+        git commit -m "Update Variables.tfvar for ${{ github.run_id }}${{ github.run_attempt }}"
+        git push
+#deploy artifacts
+  deploy-artifacts:
+    needs: prepare-artifacts
+    uses: ./.github/workflows/aws-concepts-app-infra-deploy-task.yml
+    with:
+      environment-name: ${{inputs.environment-name}}
+      build-id: "${{ github.run_id }}${{ github.run_attempt }}"
+    secrets: 
+      aws-region: ${{inputs.aws-region-name}}
+      role-to-assume: ${{secrets.role-to-assume}}
+      role-session-name: ${{secrets.role-session-name}}

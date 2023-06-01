@@ -1,0 +1,68 @@
+name: 'aws-concepts-app-api-deploy'
+
+# Run workflow only on push to main branch
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "Workloads/AwsConceptsApp/Api/**"
+      - ".github/workflows/aws-concepts-app-api-deploy.yml"
+  workflow_dispatch :
+permissions:
+      id-token: write   # This is required for requesting the JWT
+      contents: read    # This is required for actions/checkout
+jobs:
+  # To build the project and push to S3
+  build-backend:
+    name: build-backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: './Workloads/AwsConceptsApp/Api/LambdaApi'
+    steps:
+    - name: Checking out code
+      uses: actions/checkout@v3
+    - name: Setup .NET core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build and package Lambda
+      run: |
+        dotnet build --configuration Release 
+        dotnet publish -c Release -o ./lambda-api-package -r linux-x64 --no-self-contained 
+        cd lambda-api-package
+        ls
+        zip -r ../lambda-api-package.zip . 
+    - name: Upload zip file to Github Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: lambda-api-package
+        path: ./Api/LambdaApi/lambda-api-package.zip
+ 
+  deploy-backend-dev:
+    name: deploy-backend-dev
+    needs: build-backend
+    uses: ./.github/workflows/aws-concepts-app-api-deploy-task.yml
+    with:
+      environment-name: dev
+      build-id: ${{ github.run_id }}${{ github.run_attempt }}
+      artifact-lambda-api-name: lambda-api-package
+    secrets:
+      role-to-assume: arn:aws:iam::463216347886:role/awsc-github-role
+      role-session-name: awsc-github-role
+      PAT_GITHUB: ${{ secrets.PAT_TOKET_GITHUB }}
+
+  # deploy-backend-prod:
+  #   name: deploy-backend-prod
+  #   needs: deploy-backend-dev
+  #   uses: ./.github/workflows/backend-deploy-task.yml
+  #   with:
+  #     environment-name: prod
+  #     build-id: ${{ github.run_id }}${{ github.run_attempt }}
+  #     artifact-lambda-api-name: lambda-api-package
+  #   secrets: 
+  #     AWS_ACCESS_KEY: ${{ secrets.PROD_AWS_ACCESS_KEY }}
+  #     AWS_ACCESS_SECRET: ${{ secrets.PROD_AWS_SECRET_KEYS }}
+  #     PAT_GITHUB: ${{ secrets.PAT_TOKET_GITHUB }}
