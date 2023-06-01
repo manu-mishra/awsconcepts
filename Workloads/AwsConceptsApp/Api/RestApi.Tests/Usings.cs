@@ -1,0 +1,14 @@
+global using Xunit;
+global using Moq;
+global using MediatR;
+global using RestApi.Controllers;
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.AspNetCore.Http;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.TestHost;
+global using Newtonsoft.Json;
+global using System.Net;
+global using RestApi.Tests.Implementations;
+global using Microsoft.Extensions.DependencyInjection;
+global using System.Text;
+global using FluentAssertions;

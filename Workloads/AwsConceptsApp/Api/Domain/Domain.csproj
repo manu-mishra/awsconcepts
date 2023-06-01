@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Admin\**" />
+    <Compile Remove="ValueTypes\**" />
+    <EmbeddedResource Remove="Admin\**" />
+    <EmbeddedResource Remove="ValueTypes\**" />
+    <None Remove="Admin\**" />
+    <None Remove="ValueTypes\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\mishr\source\repos\dojo\Api\Domain\.editorconfig" />
+  </ItemGroup>
+	<ItemGroup>
+		<InternalsVisibleTo Include="Domain.Tests" />
+	</ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\mishr\source\repos\dojo\Api\Domain\.editorconfig" />
+  </ItemGroup>
+
+</Project>

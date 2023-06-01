@@ -1,0 +1,262 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: dojokyo-Backend-Infrastructure
+
+Parameters:
+  environmentName:
+    Type: String
+    Default: prod
+  certificateArnName:
+    Type: String
+    Default: arn:aws:acm:us-east-1:072568376481:certificate/1c7f1b2b-bc1b-4283-80b2-25f106db2eee
+  lambdaCodeUriKey:
+    Type: String
+  lambdaCodeUriBucket:
+    Type: String
+  elasticUserName:
+    Type: String
+    NoEcho: true
+  elasticUserPassword:
+    Type: String
+    NoEcho: true
+Resources:
+
+  apiDomainName1:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: api.dojokyo.com
+      DomainNameConfigurations:
+        - EndpointType: REGIONAL
+          CertificateArn: !Ref certificateArnName
+
+  apiGateway:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Description: dojokyo API Gateway
+      ProtocolType: HTTP
+      DisableExecuteApiEndpoint: false
+      CorsConfiguration:
+        AllowHeaders: 
+          - "authorization"
+          - "*"
+        AllowOrigins:
+        - !Sub "https://${apiDomainName1}"
+        - "http://localhost:3000"
+        AllowMethods:
+          - GET
+          - HEAD
+          - OPTIONS
+          - POST
+          - PUT
+          - DELETE
+          - PATCH
+      Name: !Sub "${environmentName}-api-gtw" 
+
+  apiGatewayStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref apiGateway
+      StageName: "$default"
+      Description: Live Stage
+      AutoDeploy: true 
+
+  apiGatewayV2Route:
+    Type: "AWS::ApiGatewayV2::Route"
+    Properties:
+        ApiId: !Ref apiGateway
+        ApiKeyRequired: false
+        AuthorizationType: "NONE"
+        RouteKey: "ANY /{proxy+}"
+        Target: !Sub "integrations/${apiGatewayLambdaIntegration}"
+
+  apiGatewayLambdaIntegration:
+    Type: "AWS::ApiGatewayV2::Integration"
+    Properties:
+        ApiId: !Ref apiGateway
+        ConnectionType: "INTERNET"
+        IntegrationMethod: "POST"
+        IntegrationType: "AWS_PROXY"
+        IntegrationUri: !GetAtt lambdaFunction.Arn
+        TimeoutInMillis: 30000
+        PayloadFormatVersion: "2.0"
+
+  apiBasePathMapping1:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      DomainName: !Ref apiDomainName1
+      ApiId: !Ref apiGateway
+      Stage: !Ref apiGatewayStage
+
+  lambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 
+        Bucket: !Ref lambdaCodeUriBucket
+        Key: !Sub "${lambdaCodeUriKey}/lambda-api-package.zip"
+        
+      Description: Root Lambda function
+      FunctionName: !Sub "${environmentName}-lambda-api"
+      Handler: LambdaApi::LambdaApi.LambdaEntryPoint::TracingFunctionHandlerAsync
+      Architectures:
+        - x86_64
+      MemorySize: 1024
+      Role: !GetAtt lambdaIAMRole.Arn
+      Runtime: dotnet6
+      Timeout: 30
+      Tracing: "Active"
+      Environment:
+        Variables:
+          elasticUserName: !Ref elasticUserName
+          elasticPassword: !Ref elasticUserPassword
+
+  lambdaApiGatewayInvoke:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt lambdaFunction.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/*/{proxy+}
+
+  lambdaIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Effect: Allow
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${environmentName}-lambda-api:*
+              - Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Effect: Allow
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${environmentName}-data-stream-processor:*
+              - Action:
+                  - dynamodb:PutItem
+                  - dynamodb:BatchGet*
+                  - dynamodb:DescribeStream
+                  - dynamodb:ListStreams
+                  - dynamodb:DescribeTable
+                  - dynamodb:Get*
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                  - dynamodb:BatchWrite*
+                  - dynamodb:CreateTable
+                  - dynamodb:Delete*
+                  - dynamodb:Update*
+                  - dynamodb:PutItem
+                  - dynamodb:GetShardIterator
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - comprehend:DetectEntities
+                  - comprehend:DetectKeyPhrases
+                  - comprehend:DetectDominantLanguage
+                  - comprehend:DetectSentiment
+                  - comprehend:DetectSyntax
+                  - comprehend:DetectPiiEntities
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - xray:PutTraceSegments
+                  - xray:PutTelemetryRecords
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                  - s3:GetObject
+                  - s3:GetObjectAcl
+                  - s3:AbortMultipartUpload
+                  - s3:PutObjectAcl
+                  - s3:GetObject
+                  - s3:GetObjectAcl
+                  - s3:AbortMultipartUpload
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - kinesis:DescribeStream
+                  - kinesis:DescribeStreamSummary
+                  - kinesis:DescribeStreamConsumer
+                  - kinesis:SubscribeToShard
+                  - kinesis:RegisterStreamConsumer
+                  - kinesis:PutRecord
+                  - kinesis:PutRecords
+                  - kinesis:DescribeStream
+                  - kinesis:GetRecords
+                  - kinesis:GetShardIterator
+                Resource: "*"
+                Effect: Allow
+          PolicyName: lambdaIAM
+
+  lambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${environmentName}-lambda-api
+      RetentionInDays: 30
+
+  dynamoDBTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      AttributeDefinitions: 
+        - 
+          AttributeName: "ek"
+          AttributeType: "S"
+        - 
+          AttributeName: "sk"
+          AttributeType: "S"
+      BillingMode: "PAY_PER_REQUEST"
+      TableName: "dojokyo"
+      KeySchema: 
+        - 
+          AttributeName: "ek"
+          KeyType: "HASH"
+        - 
+          AttributeName: "sk"
+          KeyType: "RANGE"  
+      GlobalSecondaryIndexes: 
+        - 
+          IndexName: "sk-pk-index"
+          KeySchema: 
+            - 
+              AttributeName: "sk"
+              KeyType: "HASH"
+            - 
+              AttributeName: "ek"
+              KeyType: "RANGE"
+          Projection: 
+              ProjectionType: "ALL"
+          ProvisionedThroughput: 
+              ReadCapacityUnits: 0
+              WriteCapacityUnits: 0
+
+  s3Bucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub s3${environmentName}dojokyo
+      VersioningConfiguration: 
+          Status: "Enabled"
+  
+
+Outputs:
+  apiGatewayInvokeURL:
+    Value: !Sub https://${apiGateway}.execute-api.${AWS::Region}.amazonaws.com/api
+
+  lambdaArn:
+    Value: !GetAtt lambdaFunction.Arn
