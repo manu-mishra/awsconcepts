@@ -1,31 +1,30 @@
-name: 'Infrastructure-Deploy'
+name: 'aws-concepts-app-infra-deploy'
 
 on:
   push:
     paths:
-      - "Infrastructure/Terraform/**"
-      - ".github/workflows/infrastructure-deploy.yml"
-      - "Infrastructure/Environments/**"
+      - "Infrastructure/AwsConceptsApp/**"
+      - ".github/workflows/aws-concepts-app-infra-deploy.yml"
   workflow_dispatch :
-
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
 jobs:
 # Deploy to dev
   call-workflow-terraform-deploy-dev:
-    uses: ./.github/workflows/terraform-deploy.yml
+    uses: ./.github/workflows/aws-concepts-app-infra-deploy-task.yml
     with:
       environment-name: dev
     secrets:
-      AWS_ACCESS_KEY: ${{ secrets.DEV_AWS_ACCESS_KEY }}
-      AWS_ACCESS_SECRET: ${{ secrets.DEV_AWS_SECRET_KEYS }}
-      PAT_GITHUB: ${{ secrets.PAT_TOKET_GITHUB }}
-# Deploy to prod
-  call-workflow-terraform-deploy-prod:
-    needs: call-workflow-terraform-deploy-dev
-    uses: ./.github/workflows/terraform-deploy.yml
-    with:
-      environment-name: prod
-    secrets: 
-      AWS_ACCESS_KEY: ${{ secrets.PROD_AWS_ACCESS_KEY }}
-      AWS_ACCESS_SECRET: ${{ secrets.PROD_AWS_SECRET_KEYS }}
-      PAT_GITHUB: ${{ secrets.PAT_TOKET_GITHUB }}
+      role-to-assume: arn:aws:iam::463216347886:role/awsc-github-role
+      role-session-name: awsc-github-role
+# # Deploy to prod
+#   call-workflow-terraform-deploy-prod:
+#     needs: call-workflow-terraform-deploy-dev
+#     uses: ./.github/workflows/aws-concepts-app-infra-deploy-task.yml
+#     with:
+#       environment-name: prod
+#     secrets: 
+#       role-to-assume: arn:aws:iam::788371085266:role/awsc-github-role
+#       role-session-name: awsc-github-role
  
