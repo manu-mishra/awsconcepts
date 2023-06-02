@@ -10,7 +10,7 @@ const config = {
   tagline: 'Exploring AWS Cloud Concepts and News',
   favicon: 'img/favicon.ico',
 
-  url: 'https://awsconcepts.com',
+  url: 'https://dev.awsconcepts.com',
   baseUrl: '/',
 
   organizationName: 'manu-mishra', // Your GitHub username
@@ -49,7 +49,7 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      image: 'img/awsconcepts-social-card.png', // Your social card
+      image: 'img/AwsConcepts-social-card.png', // Your social card
       navbar: {
         title: 'AWS Concepts',
         logo: {
