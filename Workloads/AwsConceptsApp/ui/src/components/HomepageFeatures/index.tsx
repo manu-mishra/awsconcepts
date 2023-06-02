@@ -4,48 +4,48 @@ import styles from './styles.module.css';
 
 type FeatureItem = {
   title: string;
-  Svg: React.ComponentType<React.ComponentProps<'svg'>>;
+  imageUrl: string;
   description: JSX.Element;
 };
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    title: 'AWS Cloud News',
+    imageUrl: '/img/clipart-1.png',
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Stay updated with the latest news and trends in AWS cloud. We provide a 
+        curated selection of the most relevant news about AWS services and updates.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: 'Daily AWS Blogs Summary',
+    imageUrl: '/img/clipart-4.png',
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Never miss a blog post from AWS. We provide a daily summary of blog posts 
+        so you can stay informed about the latest tips, tricks and guides.
       </>
     ),
   },
   {
-    title: 'Powered by React',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Common AWS Solutions',
+    imageUrl: '/img/clipart-2.png',
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Explore common solutions and architectures in AWS. This section can be your 
+        guide to understanding and implementing common patterns and architectures in AWS.
       </>
     ),
   },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+function Feature({title, imageUrl, description}: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
+        <img src={imageUrl} className={styles.featureImage} alt={title} />
       </div>
       <div className="text--center padding-horiz--md">
         <h3>{title}</h3>
