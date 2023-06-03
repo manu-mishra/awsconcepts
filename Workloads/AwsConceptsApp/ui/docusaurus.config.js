@@ -1,16 +1,16 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
-
+require('dotenv').config()
 const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'AWS Concepts',
-  tagline: 'Exploring AWS Cloud Concepts and News',
+  tagline: 'Delve into the world of AWS Cloud with our platform. We provide comprehensive coverage of the latest news, updates, and concepts in AWS Cloud, offering our readers a one-stop destination for everything AWS-related.',
   favicon: 'img/favicon.ico',
 
-  url: 'https://dev.awsconcepts.com',
+  url: process.env.REACT_APP_WEBSITE_URL,
   baseUrl: '/',
 
   organizationName: 'manu-mishra', // Your GitHub username
@@ -63,12 +63,7 @@ const config = {
             position: 'left',
             label: 'Aws News',
           },
-          {to: '/blog', label: 'Blog', position: 'right'},
-          {
-            href: 'https://github.com/manu-mishra/awsconcepts',
-            label: 'GitHub',
-            position: 'right',
-          },
+          {to: '/blog', label: 'Blog', position: 'left'}
         ],
       },
       footer: {
@@ -104,6 +99,14 @@ const config = {
         darkTheme: darkCodeTheme,
       },
     }),
+    plugins: [
+      [
+        'docusaurus2-dotenv',
+        {
+          systemvars: true
+        }
+      ]
+    ],
 };
 
 module.exports = config;
