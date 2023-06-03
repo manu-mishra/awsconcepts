@@ -1,9 +1,10 @@
-import { Button, useAuthenticator } from '@aws-amplify/ui-react'
+import { useAuthenticator } from '@aws-amplify/ui-react'
 import { populateUserProfile } from '@site/src/model/user-access';
 import { Auth } from 'aws-amplify';
 import React, { useEffect, useState } from 'react'
 import SignInPopup from './user-signin-popup';
 import SignOutPopup from './user-signout-popup';
+import Link from '@docusaurus/Link';
 
 const UserPersona = () => {
   const [showSignInPopup, setShowSignInPopup] = useState(false);
@@ -35,9 +36,11 @@ const UserPersona = () => {
 
   return (
     <>
-      <Button onClick={handleButtonClick}>
-        {userSignedInStatus ? "Hello! " + JSON.parse(localStorage["userProfile"])?.nickName : "Sign in"}
-      </Button>
+    <Link
+    onClick={handleButtonClick}
+            className="button button--primary">
+             {userSignedInStatus ? "Hello! " + JSON.parse(localStorage["userProfile"])?.nickName : "Sign in"}
+          </Link>
       <SignInPopup showPopup={showSignInPopup} setShowPopup={setShowSignInPopup} />
       <SignOutPopup showPopup={showSignOutPopup} setShowPopup={setShowSignOutPopup} signOut={signOut} /> 
     </>
