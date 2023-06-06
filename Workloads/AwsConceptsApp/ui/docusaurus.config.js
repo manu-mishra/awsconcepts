@@ -42,6 +42,12 @@ const config = {
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
+        sitemap: {
+          changefreq: 'daily',
+          priority: 0.5,
+          ignorePatterns: ['/tags/**'],
+          filename: 'sitemap.xml',
+        },
       }),
     ],
   ],
@@ -63,7 +69,8 @@ const config = {
             position: 'left',
             label: 'Aws News',
           },
-          {to: '/blog', label: 'Blog', position: 'left'}
+          { to: '/awsblogs', label: 'AwsBlog', position: 'left' },
+          { to: '/blog', label: 'Blog', position: 'left' }
         ],
       },
       footer: {
@@ -99,15 +106,24 @@ const config = {
         darkTheme: darkCodeTheme,
       },
     }),
-    plugins: [
-      [
-        'docusaurus-plugin-dotenv',
+  plugins: [
+    [
+      'docusaurus-plugin-dotenv',
       {
-          path: "./.env", 
-          systemvars: true, 
-      }
-      ]
+        path: "./.env",
+        systemvars: true,
+      },
     ],
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'aws-blogs',
+        path: 'awsblogs',
+        routeBasePath: 'awsblogs',
+        sidebarPath: require.resolve('./sidebars.js'),
+      }, 
+    ],
+  ],
 };
 
 module.exports = config;
