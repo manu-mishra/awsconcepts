@@ -17,7 +17,7 @@ namespace TestApp
                 var i = 1;
                 foreach (var blog in blogs)
                 {
-                    blog.Text = await GetWebResult(blog.Link);
+                    blog.Text = await FillBlogDetails(blog.Link);
                     Console.Write($"\rFetched blog number {i} for date {blog.CreatedDate}");
                     await Task.Delay(TimeSpan.FromMilliseconds(100));
                     i++;
@@ -29,11 +29,11 @@ namespace TestApp
             }
             return blogs;
         }
-        public static async Task<string> GetWebResult(string url)
+        public static async Task<string> FillBlogDetails(Blog blog)
         {
             try
             {
-                string html = await url.GetAsync().ReceiveString();
+                string html = await blog.Link.GetAsync().ReceiveString();
                 string plainText = ExtractPlainTextFromHtml(html);
                 return plainText;
             }
