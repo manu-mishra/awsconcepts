@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Flurl.Http;
+using HtmlAgilityPack;
+using Newtonsoft.Json;
 using System.Globalization;
 using System.Text;
 
@@ -12,12 +14,48 @@ namespace TestApp
             if (!blogs.Any())
             {
                 blogs = await BlogScrapper.GetAllBlogs();
+                var i = 1;
+                foreach (var blog in blogs)
+                {
+                    blog.Text = await GetWebResult(blog.Link);
+                    Console.Write($"\rFetched blog number {i} for date {blog.CreatedDate}");
+                    await Task.Delay(TimeSpan.FromMilliseconds(100));
+                    i++;
+                }
                 var json = JsonConvert.SerializeObject(blogs, Formatting.Indented);
 
                 // Write the JSON to a file, overwriting it if it already exists and creating it if it doesn't
                 await File.WriteAllTextAsync("Blogs.json", json);
             }
             return blogs;
+        }
+        public static async Task<string> GetWebResult(string url)
+        {
+            try
+            {
+                string html = await url.GetAsync().ReceiveString();
+                string plainText = ExtractPlainTextFromHtml(html);
+                return plainText;
+            }
+            catch (FlurlHttpException ex)
+            {
+                Console.WriteLine($"Error occurred while fetching the web result for URL: {url}");
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+        public static string ExtractPlainTextFromHtml(string html)
+        {
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(html);
+
+            HtmlNode articleNode = doc.DocumentNode.SelectSingleNode("//article[@class='blog-post']");
+            string plainText = articleNode?.InnerText.Trim();
+            if(string.IsNullOrEmpty(plainText))
+            {
+                Console.WriteLine("different kind of blog");
+            }
+            return plainText;
         }
         public static async Task<List<Blog>> ReadBlogsFromJsonFile(string filePath = "Blogs.json")
         {

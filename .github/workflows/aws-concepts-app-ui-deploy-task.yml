@@ -40,7 +40,9 @@ jobs:
           content=$(cat ../../../Infrastructure/AwsConceptsApp/Environments/${{ inputs.target-environment-name  }}/Ui.env)
           echo "$content" > .env
       - name: Installing dependencies
-        run: npm install
+        run: |
+          npm install
+          export NODE_OPTIONS="--max_old_space_size=4096"
       - name: Building project
         run: npm run build
       - name: Configure AWS Credentials

@@ -35,9 +35,7 @@ public static class SearchDirectory
                 Console.Write($"\rFetched {response.Items.Count} for page {page} with total {totalFetchCount}");
 
                 page++;
-
-                page++;
-                await Task.Delay(1000);
+                await Task.Delay(200);
             }
             catch (FlurlHttpException ex)
             {

@@ -43,6 +43,8 @@
         public string ContentType { get; set; }
 
         public string Slug { get; set; }
+        public string Jist { get; set; }
+        public string Text { get; set; }
 
         public List<Tag> Tags { get; set; }
     }
