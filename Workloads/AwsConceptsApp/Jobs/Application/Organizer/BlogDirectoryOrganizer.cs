@@ -8,7 +8,7 @@ namespace Organizer
         public static void CreateBlogFolders(List<Blog> blogs, string rootFolderPath)
         {
             List<BlogDirectory> directories = CategorizeBlogs(blogs);
-            string rootFolderName = "Blogs";
+            string rootFolderName = "awsblogs";
             string baseFolderPath = Path.Combine(rootFolderPath, rootFolderName);
 
             // Create the root folder

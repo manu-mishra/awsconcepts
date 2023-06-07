@@ -3,16 +3,19 @@ using Application.Model;
 using Application.Scraper.BlogsScraper;
 using Newtonsoft.Json;
 using Organizer;
-using static System.Reflection.Metadata.BlobBuilder;
 
 
-List<Blog> allBlogs = await ReadAndMergeBlogsAsync("AllBlogs1.json", "AllBlogs2.json");
-var allBlogsString = JsonConvert.SerializeObject(allBlogs);
-await File.WriteAllTextAsync("allblogs.json", allBlogsString);
+var allBlogs = await GetAllBlogsData();
 
-//BlogDirectoryOrganizer.CreateBlogFolders(allBlogs, "C:\\Users\\manumishra\\source\\repos\\manu-mishra\\awsconcepts\\Workloads\\AwsConceptsApp\\Data");
+BlogDirectoryOrganizer.CreateBlogFolders(allBlogs, "C:\\Users\\manumishra\\source\\repos\\manu-mishra\\awsconcepts\\Workloads\\AwsConceptsApp\\ui\\");
 
 //Console.ReadLine();
+static async Task<List<Blog>> GetAllBlogsData()
+{
+    // Process the first file
+    string data1 = await File.ReadAllTextAsync("allblogs.json");
+    return JsonConvert.DeserializeObject<List<Blog>>(data1);
+}
 
 static async Task<List<Blog>> ReadAndMergeBlogsAsync(string file1Path, string file2Path)
 {
