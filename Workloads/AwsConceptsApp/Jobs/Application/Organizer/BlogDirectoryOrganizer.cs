@@ -40,7 +40,7 @@ namespace Organizer
                 yearPosition++;
             }
         }
-       
+
         private static List<BlogDirectory> CategorizeBlogs(List<Blog> blogs)
         {
             var directories = new List<BlogDirectory>();
@@ -129,18 +129,29 @@ namespace Organizer
             {
                 string weekFolderPath = Path.Combine(monthFolderPath, weekDirectory.Name);
                 Directory.CreateDirectory(weekFolderPath);
-
                 string mdxFilePath = Path.Combine(weekFolderPath, "index.mdx");
                 string mdxContent = GenerateWeeklyMdxContent(weekDirectory);
                 File.WriteAllText(mdxFilePath, mdxContent);
+
+                //for (int i = 0; i < weekDirectory.Blogs.Count; i++)
+                //{
+                //    Blog? blog = weekDirectory.Blogs[i];
+                //    TimeSpan difference = blog?.CreatedDate != null ? DateTime.Now.Subtract(blog.CreatedDate) : TimeSpan.MaxValue;
+
+                //    // check if the blog is not null and not older than 2 years
+                //    if (blog != null && difference.TotalDays <= 2 * 365)
+                //    {
+                //        var blogJsx = GeneratePerBlogMdxContent(blog);
+                //        File.WriteAllText(Path.Combine(weekFolderPath, $"blog{i}.mdx"), blogJsx);
+                //    }
+
+                //};
 
             }
         }
 
         private static string GenerateWeeklyMdxContent(BlogDirectory weekDirectory)
         {
-            
-
             StringBuilder contentBuilder = new StringBuilder();
             contentBuilder.AppendLine("---");
             contentBuilder.AppendLine($"slug: {SanitizeMdxValue(weekDirectory.Name)}-Blogs");
@@ -174,60 +185,54 @@ namespace Organizer
 
             return contentBuilder.ToString();
         }
-        private static string GeneratePerBlogMdxContent(BlogDirectory weekDirectory)
+
+        private static string GeneratePerBlogMdxContent(Blog blog)
         {
-            HashSet<string> tags = new HashSet<string>();
+            string sanitizedTitle = SanitizeTitle(blog.Title);
+            string sanitizedSlug = SanitizeSlug(blog.Title);
+            string sanitizedExcerpt = SanitizeMdxValue(blog.PostExcerpt);
+            string sanitizedAuthor = string.Join(", ", blog.Author.Select(SanitizeMdxValue));
 
-            foreach (var blog in weekDirectory.Blogs)
-            {
-                foreach (var tag in blog.Tags)
-                {
-                    tags.Add(SanitizeTag(tag.Name));
-                }
-            }
-
+            var blogTagList = blog.Tags.Select(tag => $"{SanitizeTag(tag.Name)}");
             StringBuilder contentBuilder = new StringBuilder();
             contentBuilder.AppendLine("---");
-            contentBuilder.AppendLine($"slug: {SanitizeMdxValue(weekDirectory.Name)}-Blogs");
-            contentBuilder.AppendLine($"title: {SanitizeMdxValue(weekDirectory.Name)}-Blogs");
-            contentBuilder.AppendLine($"tags: [{string.Join(", ", tags.Select(tag => $"{tag}"))}]");
+            contentBuilder.AppendLine($"slug: {sanitizedSlug}");
+            contentBuilder.AppendLine($"title: {sanitizedTitle}");
+            contentBuilder.AppendLine($"tags: [{string.Join(", ", blogTagList.Select(tag => $"{tag}"))}]");
             contentBuilder.AppendLine("---");
-            contentBuilder.AppendLine("<div class=\"all-blog-posts\">");
 
-            foreach (var blog in weekDirectory.Blogs)
-            {
-                string sanitizedTitle = SanitizeMdxValue(blog.Title);
-                string sanitizedExcerpt = SanitizeMdxValue(blog.PostExcerpt);
-                string sanitizedAuthor = string.Join(", ", blog.Author.Select(SanitizeMdxValue));
+            contentBuilder.AppendLine("  <div class=\"blog-post\">");
+            contentBuilder.AppendLine("    <div class=\"top-container\">");
+            contentBuilder.AppendLine($"      <div class=\"image-container\">");
+            contentBuilder.AppendLine($"          <img src=\"{SanitizeMdxValue(blog.FeaturedImageUrl)}\" alt=\"{sanitizedTitle}\" class=\"image\"/>");
+            contentBuilder.AppendLine("      </div>");
+            contentBuilder.AppendLine("      <div class=\"content\">");
+            contentBuilder.AppendLine($"          <h3><a href=\"{SanitizeMdxValue(blog.Link)}\">{sanitizedTitle}</a></h3>");
+            contentBuilder.AppendLine($"          <p>{sanitizedExcerpt}</p>");
+            contentBuilder.AppendLine("          <div class=\"meta-data\">");
+            contentBuilder.AppendLine($"            <span>Author: <span class=\"primary-text\">{sanitizedAuthor}</span></span>");
+            contentBuilder.AppendLine($"            <span>Created: <span class=\"primary-text\">{blog.DateCreated.ToShortDateString()}</span></span>");
+            contentBuilder.AppendLine("          </div>");
+            contentBuilder.AppendLine("      </div>");
+            contentBuilder.AppendLine("    </div>");
+            contentBuilder.AppendLine("    <div class=\"tags\">");
+            contentBuilder.AppendLine("      <span>Tags: </span>");
+            contentBuilder.AppendLine($"      <span class=\"primary-text\">c</span>");
+            contentBuilder.AppendLine("    </div>");
+            contentBuilder.AppendLine("  </div>");
 
-                string blogTagList = string.Join(", ", blog.Tags.Select(tag => $"{SanitizeTag(tag.Name)}"));
-
-                contentBuilder.AppendLine("  <div class=\"blog-post\">");
-                contentBuilder.AppendLine("    <div class=\"top-container\">");
-                contentBuilder.AppendLine($"      <div class=\"image-container\">");
-                contentBuilder.AppendLine($"          <img src=\"{SanitizeMdxValue(blog.FeaturedImageUrl)}\" alt=\"{sanitizedTitle}\" class=\"image\"/>");
-                contentBuilder.AppendLine("      </div>");
-                contentBuilder.AppendLine("      <div class=\"content\">");
-                contentBuilder.AppendLine($"          <h3><a href=\"{SanitizeMdxValue(blog.Link)}\">{sanitizedTitle}</a></h3>");
-                contentBuilder.AppendLine($"          <p>{sanitizedExcerpt}</p>");
-                contentBuilder.AppendLine("          <div class=\"meta-data\">");
-                contentBuilder.AppendLine($"            <span>Author: <span class=\"primary-text\">{sanitizedAuthor}</span></span>");
-                contentBuilder.AppendLine($"            <span>Created: <span class=\"primary-text\">{blog.DateCreated.ToShortDateString()}</span></span>");
-                contentBuilder.AppendLine("          </div>");
-                contentBuilder.AppendLine("      </div>");
-                contentBuilder.AppendLine("    </div>");
-                contentBuilder.AppendLine("    <div class=\"tags\">");
-                contentBuilder.AppendLine("      <span>Tags: </span>");
-                contentBuilder.AppendLine($"      <span class=\"primary-text\">{blogTagList}</span>");
-                contentBuilder.AppendLine("    </div>");
-                contentBuilder.AppendLine("  </div>");
-            }
-
-            contentBuilder.AppendLine("</div>");
 
             return contentBuilder.ToString();
         }
+        static string SanitizeTitle(string value)
+        {
+            return Regex.Replace(SanitizeMdxValue(value), "[^a-zA-Z0-9 ]", "");
+        }
 
+        static string SanitizeSlug(string value)
+        {
+            return SanitizeTitle(value).Replace(" ", "-");
+        }
         private static string SanitizeMdxValue(string value)
         {
             if (value == null)
@@ -236,7 +241,7 @@ namespace Organizer
             // Check if the input contains HTML tags
             bool hasHtmlTags = HasHtmlTags(value);
 
-            string sanitizedValue=string.Empty;
+            string sanitizedValue = string.Empty;
 
             if (hasHtmlTags)
             {
@@ -256,8 +261,16 @@ namespace Organizer
         }
         private static string EscapeJsxBreakingCharacters(string text)
         {
-            return text.Replace("{", "").Replace("}", "").Replace("\"","").Replace("<","").Replace(">", "")
-                .Replace("&#8211;", "-");
+            // Remove '&#nnn;' sequences
+            text = Regex.Replace(text, @"&#\d+;", "");
+
+            // Replace two or more consecutive spaces with a single space
+            text = Regex.Replace(text, @"\s{2,}", " ");
+
+            // Remove specified characters
+            text = text.Replace("{", "").Replace("}", "").Replace("\"", "").Replace("<", "").Replace(">", "");
+
+            return text;
         }
         private static bool HasHtmlTags(string text)
         {

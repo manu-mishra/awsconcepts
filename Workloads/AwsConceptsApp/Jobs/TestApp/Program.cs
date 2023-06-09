@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Organizer;
 
 
-var allBlogs = await GetAllBlogsData();
+var allBlogs = (await GetAllBlogsData());//.Where(x=>x.CreatedDate.Year <2005).ToList();
 
 BlogDirectoryOrganizer.CreateBlogFolders(allBlogs, "C:\\Users\\manumishra\\source\\repos\\manu-mishra\\awsconcepts\\Workloads\\AwsConceptsApp\\ui\\");
 
