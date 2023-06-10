@@ -123,7 +123,7 @@ const config = {
         sidebarPath: require.resolve('./sidebars.js'),
       }, 
     ],
-  ],
+  ]   
 };
 
 module.exports = config;

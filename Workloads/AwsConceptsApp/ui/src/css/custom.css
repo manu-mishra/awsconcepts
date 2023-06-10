@@ -71,6 +71,9 @@
   font-size: 0.8em;
 }
 
+.meta-item a, .tags a {
+  margin-left: 10px; /* adjust this as per your requirements */
+}
 .tags {
   margin-top: 10px;
 }

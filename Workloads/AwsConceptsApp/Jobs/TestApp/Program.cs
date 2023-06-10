@@ -1,11 +1,13 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Application.Model;
 using Application.Scraper.BlogsScraper;
+using Application.Scraper.ImageScraper;
 using Newtonsoft.Json;
 using Organizer;
 
 
-var allBlogs = (await GetAllBlogsData());//.Where(x=>x.CreatedDate.Year <2005).ToList();
+var allBlogs = (await GetAllBlogsData());//.Take(10).ToList();
+//await ImageDownloader.DownloadImageImageCards(allBlogs, "images");
 
 BlogDirectoryOrganizer.CreateBlogFolders(allBlogs, "C:\\Users\\manumishra\\source\\repos\\manu-mishra\\awsconcepts\\Workloads\\AwsConceptsApp\\ui\\");
 
