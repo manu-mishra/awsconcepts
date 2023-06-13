@@ -13,10 +13,10 @@ public static class BlogScrapper
         {
             for (int i = 0; i < blogs.Count; i++)
             {
+                await Task.Delay(TimeSpan.FromMilliseconds(50));
                 var blog = blogs[i];
                 await FillBlogDetails(blog);
                 Debug.WriteLine($"Fetched blog index {i} for date {blog.CreatedDate}");
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
             }
         }
         return blogs;
