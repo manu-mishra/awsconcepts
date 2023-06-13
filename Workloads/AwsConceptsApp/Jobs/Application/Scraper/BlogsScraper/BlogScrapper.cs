@@ -1,72 +1,95 @@
 ﻿using Application.Model;
 using Application.Scraper.AwsSearch;
+using System.Diagnostics;
 
 namespace Application.Scraper.BlogsScraper;
 
 public static class BlogScrapper
 {
-    public static async Task<List<Blog>> ScrapeAllBlogsListings(int sizeOfRecordsPerRequest, int maxNumberPages, string sortOrder)
+    public static async Task<List<Blog>> ScrapeAllBlogsListings(List<Record> blogsItems)
     {
-        var blogs = ConvertItemsToBlogs(await SearchDirectory.GetSearchResultsAsync("blog-posts", sizeOfRecordsPerRequest, maxNumberPages, sortOrder));
+        var blogs = ConvertItemsToBlogs(blogsItems);
         if (blogs.Any())
         {
             for (int i = 0; i < blogs.Count; i++)
             {
                 var blog = blogs[i];
                 await FillBlogDetails(blog);
-                System.Diagnostics.Debug.WriteLine($"Fetched blog index {i} for date {blog.CreatedDate}");
+                Debug.WriteLine($"Fetched blog index {i} for date {blog.CreatedDate}");
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
-#if DEBUG
-                Console.Write($"\rFetched blog index {i} for date {blog.CreatedDate}");
-#endif
             }
         }
         return blogs;
     }
+
     private static async Task FillBlogDetails(Blog blog)
     {
         try
         {
             var response = await blog.Link.GetAsync().ReceiveString();
-            ExtractBlogContent(response, blog);
+            blog.RawHtml = response;
+            ExtractImagesUsed(blog);
         }
         catch (FlurlHttpException ex)
         {
             blog.RawHtml = "notfound";
-            Console.WriteLine($"Error occurred while fetching the web result for URL: {blog.Link}");
-            Console.WriteLine(ex.Message);
+            Debug.WriteLine($"Error occurred while fetching the web result for URL: {blog.Link}");
+            Debug.WriteLine(ex.Message);
         }
     }
 
-    private static void ExtractBlogContent(string html, Blog blog)
+    private static void ExtractImagesUsed(Blog blog)
     {
         HtmlDocument doc = new HtmlDocument();
-        doc.LoadHtml(html);
+        doc.LoadHtml(blog.RawHtml);
 
         HtmlNode articleNode = doc.DocumentNode.SelectSingleNode("//article[@class='blog-post']");
         if (articleNode == null)
             return;
-        var postContent= articleNode.SelectSingleNode("//section");
-        if (postContent == null)
-            return;
-        var preTags = postContent.Descendants("pre").ToList();
-        foreach (var preTag in preTags){
-            preTag.Remove();
+
+        // Extract images from article content
+        var postContent = articleNode.SelectSingleNode("//section");
+        ExtractImagesFromHtmlNode(blog, postContent);
+
+        // Extract images from header meta tags
+        var metaTags = doc.DocumentNode.SelectNodes("//meta");
+        if (metaTags != null)
+        {
+            foreach (var metaTag in metaTags)
+            {
+                string imageUrl = null;
+                if (metaTag.Attributes["property"]?.Value.StartsWith("og:image") == true)
+                {
+                    imageUrl = metaTag.Attributes["content"]?.Value;
+                }
+                else if (metaTag.Attributes["name"]?.Value.StartsWith("twitter:image") == true)
+                {
+                    imageUrl = metaTag.Attributes["content"]?.Value;
+                }
+
+                if (!string.IsNullOrEmpty(imageUrl))
+                {
+                    blog.ImagesUsed.Add(imageUrl);
+                }
+            }
         }
-        var allImages = postContent.Descendants("img");
+    }
+
+    private static void ExtractImagesFromHtmlNode(Blog blog, HtmlNode htmlNode)
+    {
         blog.ImagesUsed = new List<string>();
+        var allImages = htmlNode.Descendants("img");
         foreach (var image in allImages)
         {
-            // Extract image URL from "src" attribute
+            // extract image url from "src" attribute
             string imageUrl = image.GetAttributeValue("src", "");
             if (!string.IsNullOrEmpty(imageUrl))
             {
                 blog.ImagesUsed.Add(imageUrl);
             }
         }
-        blog.RawHtml = postContent.InnerHtml;
-       
     }
+
 
     static List<Blog> ConvertItemsToBlogs(List<Record> items)
     {

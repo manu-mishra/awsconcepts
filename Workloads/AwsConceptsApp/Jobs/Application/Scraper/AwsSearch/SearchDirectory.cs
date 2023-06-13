@@ -1,54 +1,105 @@
-﻿namespace Application.Scraper.AwsSearch;
+﻿using System.Diagnostics;
 
-public static class SearchDirectory
+namespace Application.Scraper.AwsSearch
 {
-    public static async Task<List<Record>> GetSearchResultsAsync(
-        string directoryId, int sizeOfRecordsPerRequest, int maxNumberPages,string sortOrder="desc")
+    public static class SearchDirectory
     {
-        string baseUrl = "https://aws.amazon.com/api/dirs/items/search";
-        int page = 0;
-        var totalFetchCount = 0;
-        bool hasMoreData = true;
-        List<Record> results = new List<Record>();
+        private const string BaseUrl = "https://aws.amazon.com/api/dirs/items/search";
+        private const int DelayMilliseconds = 100;
 
-        while (hasMoreData && page < maxNumberPages)
+        public static async Task<List<Record>> GetSearchResultsAsync(
+            string directoryId, int sizeOfRecordsPerRequest, int maxNumberPages, string sortOrder = "desc")
         {
-            string url = baseUrl.SetQueryParam("item.directoryId", directoryId)
-                                .SetQueryParam("sort_by", "item.additionalFields.createdDate")
-                                .SetQueryParam("sort_order", sortOrder)
-                                .SetQueryParam("size", sizeOfRecordsPerRequest)
-                                .SetQueryParam("item.locale", "en_US")
-                                .SetQueryParam("page", page);
+            int page = 0;
+            int totalFetchCount = 0;
+            bool hasMoreData = true;
+            List<Record> results = new List<Record>();
 
-            try
+            while (hasMoreData && page < maxNumberPages)
             {
-                var response = await url.GetJsonAsync<SearchResponse>();
-                if (response.Items.Count == 0)
+                var url = BuildSearchUrl(directoryId, sizeOfRecordsPerRequest, sortOrder, page);
+
+                try
                 {
-                    hasMoreData = false;
-                    continue;
+                    await Task.Delay(DelayMilliseconds);
+                    var response = await url.GetJsonAsync<SearchResponse>();
+                    if (response.Items.Count == 0)
+                    {
+                        hasMoreData = false;
+                        continue;
+                    }
+
+                    totalFetchCount += response.Items.Count;
+                    results.AddRange(response.Items);
+
+                    Debug.WriteLine($"Fetched {response.Items.Count} for page {page} with total {totalFetchCount}");
+
+                    page++;
+                   
                 }
-
-                totalFetchCount = totalFetchCount + response.Items.Count;
-                results.AddRange(response.Items);
-
-                Console.Write($"\rFetched {response.Items.Count} for page {page} with total {totalFetchCount}");
-
-                page++;
-                await Task.Delay(200);
+                catch (FlurlHttpException ex)
+                {
+                    Debug.WriteLine("An error occurred while making the request:");
+                    Debug.WriteLine(ex.Message);
+                    hasMoreData = false;
+                }
             }
-            catch (FlurlHttpException ex)
-            {
-                Console.WriteLine("An error occurred while making the request:");
-                Console.WriteLine(ex.Message);
-                hasMoreData = false;
-            }
+
+            Debug.WriteLine($"{totalFetchCount} data has been fetched");
+            return results;
         }
 
-        Console.WriteLine($"{totalFetchCount} data has been fetched");
-        return results;
+        public static async Task<List<Record>> GetSearchResultsByCreatedDateAsync(
+            string directoryId, int sizeOfRecordsPerRequest, int maxNumberPages, DateTime createdDate)
+        {
+            int page = 0;
+            int totalFetchCount = 0;
+            bool hasMoreData = true;
+            List<Record> results = new List<Record>();
+
+            while (hasMoreData && page < maxNumberPages)
+            {
+                var url = BuildSearchUrl(directoryId, sizeOfRecordsPerRequest, "desc", page);
+                url.SetQueryParam("item.additionalFields.createdDate", createdDate.ToString("yyyy-MM-dd"));
+
+                try
+                {
+                    await Task.Delay(DelayMilliseconds);
+                    var response = await url.GetJsonAsync<SearchResponse>();
+                    if (response.Items.Count == 0)
+                    {
+                        hasMoreData = false;
+                        continue;
+                    }
+
+                    totalFetchCount += response.Items.Count;
+                    results.AddRange(response.Items);
+
+                    Debug.WriteLine($"Fetched {response.Items.Count} for page {page} with total {totalFetchCount}");
+
+                    page++;
+                }
+                catch (FlurlHttpException ex)
+                {
+                    Debug.WriteLine("An error occurred while making the request:");
+                    Debug.WriteLine(ex.Message);
+                    hasMoreData = false;
+                }
+            }
+
+            Debug.WriteLine($"{totalFetchCount} data has been fetched");
+            return results;
+        }
+
+        private static Url BuildSearchUrl(string directoryId, int sizeOfRecordsPerRequest, string sortOrder, int page)
+        {
+            return BaseUrl
+                .SetQueryParam("item.directoryId", directoryId)
+                .SetQueryParam("sort_by", "item.additionalFields.createdDate")
+                .SetQueryParam("sort_order", sortOrder)
+                .SetQueryParam("size", sizeOfRecordsPerRequest)
+                .SetQueryParam("item.locale", "en_US")
+                .SetQueryParam("page", page);
+        }
     }
-
-
-
 }
