@@ -19,3 +19,9 @@ resource "aws_s3_bucket_public_access_block" "object_store_s3block" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+resource "aws_iam_policy_attachment" "s3_full_access_attach" {
+  name       = "s3-full-access-attachment"
+  roles      = [aws_iam_role.sm_domain_iam_role.name]
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+}

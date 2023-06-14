@@ -1,0 +1,52 @@
+# This is a basic workflow to help you get started with Actions
+
+name: data science embeddings container build
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "Workloads/DataScience/apps/Embeddings/**"
+      - ".github/workflows/ds-embeddings-container-build.yml"
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+jobs:
+  build_and_push:
+    name: 'create and push container to ecr'
+    runs-on: ubuntu-latest
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: 'Workloads/DataScience/apps/Embeddings'
+
+    steps:
+    
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1.7.0
+      with:
+        aws-region: us-east-2
+        role-to-assume: arn:aws:iam::675243278807:role/github-deploy-role
+        role-session-name: data-science-github-deploy-role
+
+   
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push Docker image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: awsc_ds_embeddings_container_registry
+        IMAGE_TAG: latest
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
