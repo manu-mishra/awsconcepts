@@ -7,8 +7,11 @@ using TestApp;
 
 // Step 2
 // fetchDetails
-await HelperMethods.FillListWithBlogContent("allBlogList20230613");
+//await HelperMethods.FillListWithBlogContent("allBlogList20230613","allBlogList20230613Detailed");
 
+
+//Step 3
+await HelperMethods.PrepareTextForModelTraining("allBlogList20230613Detailed", "TokenTrainingText.txt");
 
 Console.ReadLine();
 

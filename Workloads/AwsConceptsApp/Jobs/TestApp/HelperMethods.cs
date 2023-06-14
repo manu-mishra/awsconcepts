@@ -1,9 +1,9 @@
-﻿using Application.Model;
-using Application.Scraper.AwsSearch;
+﻿using Application.Scraper.AwsSearch;
 using Application.Scraper.BlogsScraper;
 using Newtonsoft.Json;
-using Parquet;
-using System.IO.Compression;
+using Application.FileHelpers;
+using Application.Blogs;
+using Application.Model;
 
 namespace TestApp
 {
@@ -17,48 +17,32 @@ namespace TestApp
 
         }
 
-        public static async Task FillListWithBlogContent(string filename)
+        public static async Task FillListWithBlogContent(string filename, string targetFileName)
         {
-            var allBlogs = await ReadFileContent(filename);
-            var allBlogWithDetails = await FillDetails(allBlogs);
-            await WriteContentToFile(filename, allBlogWithDetails);
-        }
-
-        public static async Task<List<Record>> ReadFileContent(string filename)
-        {
-            using (var inputFileStream = File.OpenRead(filename))
-            using (var streamReader = new StreamReader(inputFileStream))
-            using (var jsonReader = new JsonTextReader(streamReader))
-            {
-                var jsonSerializer = new JsonSerializer();
-                return await Task.Run(() => jsonSerializer.Deserialize<List<Record>>(jsonReader));
-            }
-        }
-
-
-        public static async Task<List<Blog>> FillDetails(List<Record> allBlogs)
-        {
+            var allBlogs = (new List<Record>()).FillFromFile(filename);
             var allBlogWithDetails = await BlogScrapper.ScrapeAllBlogsListings(allBlogs);
-            return allBlogWithDetails;
+            await allBlogWithDetails.WriteToJsonFile(targetFileName);
         }
-
-        public static async Task WriteContentToFile(string filename, List<Blog> allBlogWithDetails)
+     
+        public static async Task PrepareTextForModelTraining(string filename, string targetFileName)
         {
-            using (var outputFileStream = File.CreateText($"{filename}Detailed"))
-            using (var jsonWriter = new JsonTextWriter(outputFileStream))
+            var allBlogs = (new List<Blog>()).FillFromFile(filename);
+            using (StreamWriter writer = new StreamWriter(targetFileName))
             {
-                var jsonSerializer = new JsonSerializer();
-
-                await jsonWriter.WriteStartArrayAsync();
-
-                foreach (var blog in allBlogWithDetails)
+                foreach (var item in allBlogs)
                 {
-                    jsonSerializer.Serialize(jsonWriter, blog);
-                    await outputFileStream.WriteLineAsync();
-                }
+                    var lines = item.ExtractHtmlTextLines();
 
-                await jsonWriter.WriteEndArrayAsync();
+                    foreach (var line in lines)
+                    {
+                        if (!string.IsNullOrWhiteSpace(line))
+                        {
+                            await writer.WriteLineAsync(line);
+                        }
+                    }
+                }
             }
+
         }
 
     }
