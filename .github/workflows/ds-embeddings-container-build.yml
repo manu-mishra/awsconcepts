@@ -35,7 +35,7 @@ jobs:
       with:
         aws-region: us-east-2
         role-to-assume: arn:aws:iam::675243278807:role/github-deploy-role
-        role-session-name: data-science-github-deploy-role
+        role-session-name: github-deploy-role
 
    
     - name: Login to Amazon ECR
