@@ -28,12 +28,23 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
     
+    - uses: actions/github-script@v6
+      id: script
+      timeout-minutes: 10
+      with:
+        debug: true
+        script: |
+          const token = process.env['ACTIONS_RUNTIME_TOKEN']
+          const runtimeUrl = process.env['ACTIONS_ID_TOKEN_REQUEST_URL']
+          core.setOutput('TOKEN', token.trim())
+          core.setOutput('IDTOKENURL', runtimeUrl.trim())
+          
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1.7.0
       with:
         aws-region: us-east-2
-        role-to-assume: arn:aws:iam::675243278807:role/awsc-github-role
-        role-session-name: awsc-github-role
+        role-to-assume: arn:aws:iam::675243278807:role/github-deploy-role
+        role-session-name: github-deploy-role
 
    
     - name: Login to Amazon ECR
