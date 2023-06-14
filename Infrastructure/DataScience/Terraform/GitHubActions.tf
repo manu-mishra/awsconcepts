@@ -35,3 +35,8 @@ resource "aws_iam_role" "GitHubWriteRole" {
   max_session_duration = 3600
   tags = {}
 }
+
+resource "aws_iam_role_policy_attachment" "GitHubWriteRole_AdminAccess" {
+  role       = aws_iam_role.GitHubWriteRole.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
