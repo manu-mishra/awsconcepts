@@ -32,8 +32,8 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v1.7.0
       with:
         aws-region: us-east-2
-        role-to-assume: arn:aws:iam::675243278807:role/github-deploy-role
-        role-session-name: github-deploy-role
+        role-to-assume: arn:aws:iam::675243278807:role/awsc-github-role
+        role-session-name: awsc-github-role
 
    
     - name: Login to Amazon ECR
