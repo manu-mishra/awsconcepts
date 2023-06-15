@@ -16,15 +16,15 @@ data "aws_iam_policy_document" "GitHubWritePolicy" {
 
     condition {
       test     = "StringEquals"
-      variable = "token.actions.github.com:aud"
+      variable = "token.actions.githubusercontent.com:aud"
       values   = ["sts.amazonaws.com"]
     }
 
-    # condition {
-    #   test     = "StringEquals"
-    #   variable = "token.actions.githubusercontent.com:sub"
-    #   values   = ["job_workflow_ref:manu-mishra/awsconcepts/.github/workflows/ds-embeddings-container-build.yml@refs/heads/main"]
-    # }
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = ["job_workflow_ref:manu-mishra/awsconcepts/.github/workflows/ds-embeddings-container-build.yml@refs/heads/main"]
+    }
   }
 }
 
