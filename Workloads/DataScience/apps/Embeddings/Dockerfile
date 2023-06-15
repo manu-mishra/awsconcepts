@@ -1,6 +1,6 @@
 # Define the base image
 # more here https://github.com/aws/deep-learning-containers/blob/master/available_images.md
-FROM 763104351884.dkr.ecr.us-east-1.amazonaws.com/pytorch-training:2.0.0-cpu-py310-ubuntu20.04-ec2
+FROM 763104351884.dkr.ecr.us-east-1.amazonaws.com/pytorch-inference-graviton:2.0.1-cpu-py310-ubuntu20.04-sagemaker
 
 # Copy the requirements file into the container
 COPY requirements.txt /tmp/
