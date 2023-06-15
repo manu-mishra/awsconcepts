@@ -23,7 +23,7 @@ variable "GIT_Hub_REPO_URL" {
 variable "Is_Ecr_Embeddings_Container_Image_Ready" {
   description = "if the ecr image is available for endpoints"
   type        = bool
-  default = false
+  default = true
 }
 
 variable "Git_Hub_Thumbprint_List" {

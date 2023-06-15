@@ -1,0 +1,49 @@
+name: ds-infra-deploy
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "Infrastructure/DataScience/Terraform/**"
+      - ".github/workflows/ds-infra-deploy.yml"
+  workflow_dispatch :
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+jobs:
+  build_and_push:
+    name: 'create and push container to ecr'
+    runs-on: ubuntu-latest
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: 'Infrastructure/DataScience/Terraform'
+
+    steps:
+    
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1.7.0
+      with:
+        aws-region: us-east-1
+        role-to-assume: arn:aws:iam::675243278807:role/github-deploy-role
+        role-session-name: github-deploy-role
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.3.6
+  
+    - name: Terraform deploy
+      run: |
+        terraform init -backend-config="LocalInit.tfvars"
+        terraform plan
+        terraform apply -auto-approve
+    
+   

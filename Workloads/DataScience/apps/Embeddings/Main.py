@@ -1,4 +1,5 @@
 import os
+import json
 from transformers import RobertaModel, RobertaTokenizerFast
 import torch
 
@@ -19,6 +20,18 @@ def model_fn(model_dir):
     
     return {'tokenizer': tokenizer, 'model': model}
 
+def input_fn(request_body, request_content_type):
+    if request_content_type == "application/json":
+        request_body = json.loads(request_body)
+        if isinstance(request_body, str):
+            return request_body
+        elif isinstance(request_body, list) and len(request_body) > 0 and isinstance(request_body[0], str):
+            return request_body
+        else:
+            raise ValueError("Received input in an unexpected format.")
+    else:
+        raise ValueError("Received request with content type: {}".format(request_content_type))
+
 def predict_fn(input_object, model):
     tokenizer = model['tokenizer']
     model = model['model']
@@ -29,9 +42,9 @@ def predict_fn(input_object, model):
     vectors = embeddings.detach().numpy().tolist()
     
     return vectors
-### test sample
-if __name__ == "__main__":
-    model_dir = os.path.dirname(os.path.realpath(__file__))
-    model = model_fn(model_dir)
-    result = predict_fn("Some text for testing", model)
-    print(result)
+
+def output_fn(prediction, response_content_type):
+    if response_content_type == "application/json":
+        return json.dumps(prediction), response_content_type
+    else:
+        raise ValueError("Received request with response type: {}".format(response_content_type))
