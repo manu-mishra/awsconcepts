@@ -1,10 +1,11 @@
 import os
+import json
 from Main import model_fn, input_fn, predict_fn, output_fn
 
 def test_model():
     model_dir = os.path.dirname(os.path.realpath(__file__))
     model = model_fn(model_dir)
-    input_data = "This is a test sentence."
+    input_data = json.dumps("This is a test sentence.")
     request_content_type = "application/json"
     response_content_type = "application/json"
 

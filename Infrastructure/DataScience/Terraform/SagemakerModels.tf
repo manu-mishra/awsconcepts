@@ -15,7 +15,7 @@ resource "aws_sagemaker_endpoint_configuration" "embeddings_end_point_config" {
     model_name             = aws_sagemaker_model.embeddings_model[count.index].name
     serverless_config {
       max_concurrency = 10
-      memory_size_in_mb = 2048      
+      memory_size_in_mb = 6144       
     }
   }
 }
