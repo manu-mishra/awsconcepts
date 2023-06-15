@@ -13,7 +13,7 @@ permissions:
   contents: read    # This is required for actions/checkout
 jobs:
   build_and_push:
-    name: 'create and push container to ecr'
+    name: 'Deploy terraform templates'
     runs-on: ubuntu-latest
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
