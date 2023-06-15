@@ -44,13 +44,11 @@ jobs:
 
     - name: Build, tag, and push Docker image to Amazon ECR
       env:
-        ECR_LOGINOUTPUT: ${{ steps.login-ecr.outputs}}
         ECR_REGISTRY0: 763104351884.dkr.ecr.us-east-1.amazonaws.com
         ECR_REGISTRY1: 675243278807.dkr.ecr.us-east-1.amazonaws.com
         ECR_REPOSITORY: awsc_ds_embeddings_container_registry
         IMAGE_TAG: latest
       run: |
-        echo $ECR_LOGINOUTPUT
         docker build -t $ECR_REGISTRY0/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY1/$ECR_REPOSITORY:$IMAGE_TAG
 
