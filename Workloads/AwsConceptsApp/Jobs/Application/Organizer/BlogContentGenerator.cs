@@ -4,20 +4,19 @@ namespace Application.Organizer
 {
     public class BlogContentGenerator
     {
-        public static string GenerateMonthlyMdxContent(BlogDirectory monthDirectory)
+        public static string GenerateMdxContent(List<Blog> blogs, string month, int year, string week)
         {
-            var pageDescription = GetMonthDescription(monthDirectory);
+            var pageDescription = GetDescription(month, year, week);
             StringBuilder contentBuilder = new StringBuilder();
             contentBuilder.AppendLine("---");
+            contentBuilder.AppendLine($"slug: {Helper.SanitizeMdxValue(week)}-Blogs");
+            contentBuilder.AppendLine($"title: {Helper.SanitizeMdxValue(week)}-Blogs");
             contentBuilder.AppendLine($"description: {pageDescription}");
-            if (monthDirectory.Year >= 2022)
-                contentBuilder.AppendLine($"image: TwitterCard.webp");
-            //contentBuilder.AppendLine($"tags: [{string.Join(", ", GetTags(monthDirectory).Select(tag => $"{tag}"))}]");
             contentBuilder.AppendLine("---");
 
             contentBuilder.AppendLine("<div class=\"all-blog-posts\">");
 
-            foreach (var blog in monthDirectory.Blogs)
+            foreach (var blog in blogs)
             {
                 string sanitizedTitle = Helper.SanitizeMdxValue(blog.Title);
                 string sanitizedExcerpt = Helper.SanitizeMdxValue(blog.PostExcerpt);
@@ -43,49 +42,39 @@ namespace Application.Organizer
 
             return contentBuilder.ToString();
         }
+
         private static string getAuthorAnchorsTags(Blog blog)
         {
-
             StringBuilder contentBuilder = new StringBuilder();
             foreach (var author in blog.Author)
             {
                 foreach (var item in author.Split(","))
                 {
                     var authorName = Helper.SanitizeTag(Helper.SanitizeMdxValue(item));
-                    //contentBuilder.AppendLine($"<a href=\"../../tags/{authorName.Replace(" ", "-")}\">{authorName}</a>");
                     contentBuilder.AppendLine($"{authorName} ");
                 }
-
             }
             return contentBuilder.ToString();
         }
-        private static string GetMonthDescription(BlogDirectory monthDirectory)
+
+        private static string GetDescription(string month, int year, string week)
         {
-            string response = $"All official AWS blogs created in {monthDirectory.Name} - {monthDirectory.Year}. Chechout full list of historical blogs at www.awsconcepts.com";
-            var refBlog = monthDirectory.Blogs.FirstOrDefault();
-            if (refBlog != null)
-            {
-                response = $"All official AWS blogs created in {monthDirectory.Name} - {monthDirectory.Year}. Chechout full list of historical blogs at www.awsconcepts.com";
-            }
+            string response = $"All official AWS blogs created in {week} of {month} - {year}. Checkout the full list of historical blogs at www.awsconcepts.com";
             return response;
         }
-        private static HashSet<string> GetTags(BlogDirectory weekDirectory)
+
+        private static HashSet<string> GetTags(List<Blog> blogs)
         {
             HashSet<string> tags = new HashSet<string>();
-
-            foreach (var blog in weekDirectory.Blogs)
+            foreach (var blog in blogs)
             {
-                //foreach (var tag in blog.Tags)
-                //{
-                //    tags.Add(SanitizeTag(tag.Name));
-                //}
                 foreach (var author in blog.Author)
                 {
                     tags.Add(Helper.SanitizeTag(author));
                 }
             }
-
             return tags;
         }
     }
+
 }

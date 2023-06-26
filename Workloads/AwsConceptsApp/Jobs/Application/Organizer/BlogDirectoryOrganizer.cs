@@ -31,14 +31,15 @@ namespace Organizer
                 foreach (var monthDirectory in sortedMonthDirectories)
                 {
                     string monthFolderPath = SetupMonth(yearFolderPath, monthDirectory.Name, monthPosition);
-                    SetupMonth(monthDirectory, monthFolderPath);
+
+                    SetupWeeks(monthDirectory, monthFolderPath);
+
                     monthPosition++;
                 }
 
                 yearPosition++;
             }
         }
-       
         private static List<BlogDirectory> CategorizeBlogs(List<Blog> blogs)
         {
             var directories = new List<BlogDirectory>();
@@ -48,6 +49,7 @@ namespace Organizer
                 var year = blog.CreatedDate.Year;
                 var yearString = year.ToString();
                 var month = blog.CreatedDate.ToString("MMMM");
+                var week = $"Week-{GetWeekOfMonth(blog.CreatedDate)}";
 
                 var parentDirectory = directories.FirstOrDefault(d => d.Name == yearString);
                 if (parentDirectory == null)
@@ -77,12 +79,34 @@ namespace Organizer
                     parentDirectory.Subdirectories.Add(monthDirectory);
                 }
 
-                monthDirectory.Blogs.Add(blog);
+                var weekDirectory = monthDirectory.Subdirectories.FirstOrDefault(d => d.Name == week);
+                if (weekDirectory == null)
+                {
+                    weekDirectory = new BlogDirectory
+                    {
+                        Name = week,
+                        Year = year,
+                        Subdirectories = new List<BlogDirectory>(),
+                        Blogs = new List<Blog>(),
+                        TotalBlogs = 0
+                    };
+                    monthDirectory.Subdirectories.Add(weekDirectory);
+                }
+
+                weekDirectory.Blogs.Add(blog);
+                weekDirectory.TotalBlogs++;
                 monthDirectory.TotalBlogs++;
                 parentDirectory.TotalBlogs++;
             }
 
             return directories;
+        }
+        private static int GetWeekOfMonth(DateTime date)
+        {
+            // Calculate the week of the month using the ISO 8601 definition
+            var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
+            var weekNumber = (int)Math.Ceiling((date.Day + (int)firstDayOfMonth.DayOfWeek - 1) / 7.0);
+            return weekNumber;
         }
         private static string SetupYear(string baseFolderPath, string year, int position)
         {
@@ -98,6 +122,25 @@ namespace Organizer
             CreateCategoryFile(month, monthFolderPath, position);
             return monthFolderPath;
         }
+        private static void SetupWeeks(BlogDirectory monthDirectory, string monthFolderPath)
+        {
+            foreach (var weekDirectory in monthDirectory.Subdirectories)
+            {
+                string mdxFilePath = Path.Combine(monthFolderPath, $"{weekDirectory.Name}.mdx");
+                string mdxContent = BlogContentGenerator.GenerateMdxContent(weekDirectory.Blogs,monthDirectory.Name, monthDirectory.Year, weekDirectory.Name);
+                File.WriteAllText(mdxFilePath, mdxContent);
+            }
+        }
+        private static string GetWeekDescription(BlogDirectory weekDirectory)
+        {
+            string response = $"All official AWS blogs created in {weekDirectory.Name}. Chechout full list of historical blogs at www.awsconcepts.com";
+            var refBlog = weekDirectory.Blogs.FirstOrDefault();
+            if (refBlog != null)
+            {
+                response = $"All official AWS blogs created in {refBlog.CreatedDate.Year}-{refBlog.CreatedDate.ToString("MMMM")}-{weekDirectory.Name}. Chechout full list of historical blogs at www.awsconcepts.com";
+            }
+            return response;
+        }
         private static void CreateCategoryFile(string label, string folderPath, int position)
         {
             string categoryFilePath = Path.Combine(folderPath, "_category_.json");
@@ -112,16 +155,6 @@ namespace Organizer
             };
             Helper.WriteJsonToFile(categoryFilePath, categoryData);
         }
-        private static void SetupMonth(BlogDirectory monthDirectory, string monthFolderPath)
-        {
-            string mdxFilePath = Path.Combine(monthFolderPath, "index.mdx");
-            string mdxContent = BlogContentGenerator.GenerateMonthlyMdxContent(monthDirectory);
-            File.WriteAllText(mdxFilePath, mdxContent);
-            if (monthDirectory.Year < 2022)
-                return;
-            ImageGenerator.GenerateCompositeImageForLinkedIn(monthDirectory.Blogs, monthFolderPath, "", "images");
-            ImageGenerator.GenerateCompositeImageForTwitter(monthDirectory.Blogs, monthFolderPath, "", "images");
-        }
-       
+      
     }
 }
