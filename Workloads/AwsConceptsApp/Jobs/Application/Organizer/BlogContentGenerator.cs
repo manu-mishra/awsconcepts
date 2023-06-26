@@ -12,6 +12,7 @@ namespace Application.Organizer
             contentBuilder.AppendLine($"slug: {Helper.SanitizeMdxValue(week)}-Blogs");
             contentBuilder.AppendLine($"title: {Helper.SanitizeMdxValue(week)}-Blogs");
             contentBuilder.AppendLine($"description: {pageDescription}");
+            contentBuilder.AppendLine($"tags: [{string.Join(", ", GetTags(blogs).Select(tag => $"{tag}"))}]");
             contentBuilder.AppendLine("---");
 
             contentBuilder.AppendLine("<div class=\"all-blog-posts\">");
@@ -45,14 +46,16 @@ namespace Application.Organizer
 
         private static string getAuthorAnchorsTags(Blog blog)
         {
+
             StringBuilder contentBuilder = new StringBuilder();
             foreach (var author in blog.Author)
             {
                 foreach (var item in author.Split(","))
                 {
                     var authorName = Helper.SanitizeTag(Helper.SanitizeMdxValue(item));
-                    contentBuilder.AppendLine($"{authorName} ");
+                    contentBuilder.AppendLine($"<a href=\"../../tags/{authorName.Replace(" ", "-").Replace(".", "")}\">{authorName}</a>");
                 }
+
             }
             return contentBuilder.ToString();
         }
