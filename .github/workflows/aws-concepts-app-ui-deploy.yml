@@ -1,33 +1,33 @@
-# Name of workflow as seen in Github actions tab
-name: aws-concepts-app-ui-deploy
-# Run workflow only on push to main branch
-on:
-  push:
-    branches: [ main ]
-    paths:
-      - "Workloads/AwsConceptsApp/ui/**"
-      - ".github/workflows/aws-concepts-app-ui-deploy.yml"
-  workflow_dispatch :
-permissions:
-  id-token: write   # This is required for requesting the JWT
-  contents: read    # This is required for actions/checkout
-jobs:
-  # To deploy to dev env
-  call-workflow-ui-deploy-to-env-dev:
-    uses: ./.github/workflows/aws-concepts-app-ui-deploy-task.yml
-    with:
-      target-bucket-name: s3://dev.awsconcepts.com
-      target-environment-name: dev
-    secrets: 
-      role-to-assume: arn:aws:iam::463216347886:role/awsc-github-role
-      role-session-name: awsc-github-role
-  # To deploy to prod
-  # call-workflow-ui-deploy-to-env-prod:
-  #   needs: call-workflow-ui-deploy-to-env-dev
-  #   uses: ./.github/workflows/ui-deploy-to-env.yml
-  #   with:
-  #     target-bucket-name: s3://prod.awsconcepts.com
-  #     target-environment-name: prod
-  #   secrets: 
-  #     role-to-assume: arn:aws:iam::788371085266:role/awsc-github-role
-  #     role-session-name: awsc-github-role
+# # Name of workflow as seen in Github actions tab
+# name: aws-concepts-app-ui-deploy
+# # Run workflow only on push to main branch
+# on:
+#   push:
+#     branches: [ main ]
+#     paths:
+#       - "Workloads/AwsConceptsApp/ui/**"
+#       - ".github/workflows/aws-concepts-app-ui-deploy.yml"
+#   workflow_dispatch :
+# permissions:
+#   id-token: write   # This is required for requesting the JWT
+#   contents: read    # This is required for actions/checkout
+# jobs:
+#   # To deploy to dev env
+#   call-workflow-ui-deploy-to-env-dev:
+#     uses: ./.github/workflows/aws-concepts-app-ui-deploy-task.yml
+#     with:
+#       target-bucket-name: s3://dev.awsconcepts.com
+#       target-environment-name: dev
+#     secrets: 
+#       role-to-assume: arn:aws:iam::463216347886:role/awsc-github-role
+#       role-session-name: awsc-github-role
+#   # To deploy to prod
+#   # call-workflow-ui-deploy-to-env-prod:
+#   #   needs: call-workflow-ui-deploy-to-env-dev
+#   #   uses: ./.github/workflows/ui-deploy-to-env.yml
+#   #   with:
+#   #     target-bucket-name: s3://prod.awsconcepts.com
+#   #     target-environment-name: prod
+#   #   secrets: 
+#   #     role-to-assume: arn:aws:iam::788371085266:role/awsc-github-role
+#   #     role-session-name: awsc-github-role
