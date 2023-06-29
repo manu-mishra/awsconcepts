@@ -40,7 +40,7 @@ variable "VPC_CIDR_BLOCK" {
   description = "CIDR block for the VPC"
   type        = string
 }
-variable "PUBLIC_SUBNET_CIDR_BLOCK" {
+variable "PUBLIC_SUBNET_CIDR_BLOCK_AZ_A" {
   description = "CIDR block for the public subnet"
   type        = string
 }
