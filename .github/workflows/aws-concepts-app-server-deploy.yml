@@ -1,0 +1,23 @@
+# Name of workflow as seen in Github actions tab
+name: aws-concepts-app-ui-deploy
+# Run workflow only on push to main branch
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "Workloads/AwsConceptsApp/ui/**"
+      - ".github/workflows/aws-concepts-app-server-deploy.yml"
+  workflow_dispatch :
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+jobs:
+  # To deploy to dev env
+  call-workflow-ui-deploy-to-env-dev:
+    uses: ./.github/workflows/aws-concepts-app-server-deploy.yml
+    with:
+      target-environment-name: dev
+    secrets: 
+      role-to-assume: arn:aws:iam::463216347886:role/awsc-github-role
+      role-session-name: awsc-github-role
+  
