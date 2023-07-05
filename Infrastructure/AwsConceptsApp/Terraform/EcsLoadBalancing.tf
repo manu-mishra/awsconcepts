@@ -3,8 +3,8 @@ resource "aws_lb" "application" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
-  subnets            = [aws_subnet.public.id]
-
+  subnets            = [aws_subnet.public_AZ_A.id, aws_subnet.public_AZ_B.id, aws_subnet.public_AZ_C.id]
+  depends_on = [aws_nat_gateway.main]
   # Include other configurations...
 }
 
@@ -13,6 +13,7 @@ resource "aws_lb_target_group" "appserver" {
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
+  target_type = "ip"  
 
   health_check {
     enabled             = true

@@ -44,6 +44,14 @@ variable "PUBLIC_SUBNET_CIDR_BLOCK_AZ_A" {
   description = "CIDR block for the public subnet"
   type        = string
 }
+variable "PUBLIC_SUBNET_CIDR_BLOCK_AZ_B" {
+  description = "CIDR block for the public subnet"
+  type        = string
+}
+variable "PUBLIC_SUBNET_CIDR_BLOCK_AZ_C" {
+  description = "CIDR block for the public subnet"
+  type        = string
+}
 variable "CONTAINER_WORKLOADS_CIDR_BLOCK_AZ_A" {
   description = "CIDR block for the container workloads subnet in AZ A"
   type        = string

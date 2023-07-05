@@ -1,0 +1,87 @@
+# Name of workflow as seen in Github actions tab
+name: aws-concepts-ui-deploy-task
+# Run workflow only on push to main branch
+on:
+  workflow_call:
+    inputs:
+      target-environment-name:
+        description: 'name of environment from where env file will be picked up'
+        required: true
+        type: string
+      aws-region-name:
+        description: 'aws region to deploy infrastructure'
+        type: string
+        default: 'us-east-1'     
+    secrets:
+      role-to-assume: 
+        required: true
+      role-session-name: 
+        required: true
+jobs:
+  # To build the project
+  build-container-image:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 'Workloads/AwsConceptsApp/ui'
+    steps:
+      - name: Checking out code
+        uses: actions/checkout@v3
+      - name: Installing Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+      - name: replace environment file
+        run: |
+          content=$(cat ../../../Infrastructure/AwsConceptsApp/Environments/${{ inputs.target-environment-name  }}/Ui.env)
+          echo "$content" > .env
+      - name: Installing dependencies
+        run: npm install
+      - name: Building project
+        env:
+          NODE_OPTIONS: "--max_old_space_size=6096"
+        run: npm run build
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{inputs.aws-region-name}}
+          role-to-assume: ${{secrets.role-to-assume}}
+          role-session-name: ${{secrets.role-session-name}}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1  
+        
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      - name: Update Variables.tfvar
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+        run: |
+          cd ../../../Infrastructure/AwsConceptsApp/Environments/${{inputs.target-environment-name }}/ 
+          git config --local user.email "app-server-deploy-task@yml.com"
+          git config --local user.name "GitHub Actions app-server-deploy-task.yml"
+          git pull
+          echo -e "APP_SERVER_IMAGE_TAG =\"${{ github.run_id }}${{ github.run_attempt }}\"\nAPP_SERVER_HAS_IMAGE = true" > Variables.tfvars
+          git add Variables.tfvars
+          git commit -m "Update Variables.tfvar for ${{ github.run_id }}${{ github.run_attempt }}"
+          git push
+  deploy-artifacts:
+    needs: build-container-image
+    uses: ./.github/workflows/aws-concepts-app-infra-deploy-task.yml
+    with:
+      environment-name: ${{inputs.target-environment-name }}
+      build-id: "${{ github.run_id }}${{ github.run_attempt }}"
+      aws-region-name: ${{inputs.aws-region-name}}
+    secrets: 
+      role-to-assume: ${{secrets.role-to-assume}}
+      role-session-name: ${{secrets.role-session-name}}    
+
