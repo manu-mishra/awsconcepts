@@ -1,5 +1,5 @@
 # Name of workflow as seen in Github actions tab
-name: aws-concepts-app-ui-deploy
+name: aws-concepts-app-server-deploy
 # Run workflow only on push to main branch
 on:
   push:
@@ -14,7 +14,7 @@ permissions:
 jobs:
   # To deploy to dev env
   call-workflow-ui-deploy-to-env-dev:
-    uses: ./.github/workflows/aws-concepts-app-server-deploy.yml
+    uses: ./.github/workflows/aws-concepts-app-server-deploy-task.yml
     with:
       target-environment-name: dev
     secrets: 

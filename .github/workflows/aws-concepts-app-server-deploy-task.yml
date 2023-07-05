@@ -1,5 +1,5 @@
 # Name of workflow as seen in Github actions tab
-name: aws-concepts-ui-deploy-task
+name: aws-concepts-app-server-deploy-task
 # Run workflow only on push to main branch
 on:
   workflow_call:
