@@ -72,12 +72,9 @@ jobs:
           git config --local user.email "app-server-deploy-task@yml.com"
           git config --local user.name "GitHub Actions app-server-deploy-task.yml"
           git pull
-          # Read the existing content of Variables.tfvars
-          existing_content=$(cat Variables.tfvars)
           # Replace or add variables
-          updated_content=$(echo "$existing_content" | sed -E 's/(APP_SERVER_IMAGE_TAG =)".*"/\1"'"${{ env.IMAGE_TAG }}\""/; s/(APP_SERVER_HAS_IMAGE =).*/\1 true/')
-          echo "$updated_content"
-          echo "$updated_content" > Variables.tfvars
+          sed -i "s/APP_SERVER_IMAGE_TAG =.*/APP_SERVER_IMAGE_TAG = \"${IMAGE_TAG}\"/" Variables.tfvars
+          sed -i "s/APP_SERVER_HAS_IMAGE =.*/APP_SERVER_HAS_IMAGE = true/" Variables.tfvars
           git add Variables.tfvars
           git commit -m "Update Variables.tfvar for ${{ github.run_id }}${{ github.run_attempt }}"
           git push
