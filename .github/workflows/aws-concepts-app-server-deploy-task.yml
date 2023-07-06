@@ -66,6 +66,7 @@ jobs:
       - name: Update Variables.tfvar
         env:
             GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+            IMAGE_TAG: ${{ github.sha }}
         run: |
           cd ../../../Infrastructure/AwsConceptsApp/Environments/${{inputs.target-environment-name }}/ 
           git config --local user.email "app-server-deploy-task@yml.com"
