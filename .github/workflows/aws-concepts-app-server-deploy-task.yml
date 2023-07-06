@@ -65,7 +65,7 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
       - name: Update Variables.tfvar
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+            GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
         run: |
           cd ../../../Infrastructure/AwsConceptsApp/Environments/${{inputs.target-environment-name }}/ 
           git config --local user.email "app-server-deploy-task@yml.com"
@@ -74,7 +74,7 @@ jobs:
           # Read the existing content of Variables.tfvars
           existing_content=$(cat Variables.tfvars)
           # Replace or add variables
-          updated_content=$(echo "$existing_content" | sed -E 's/(APP_SERVER_IMAGE_TAG =)".*"/\1"'"${{ github.run_id }}${{ github.run_attempt }}\""/; s/(APP_SERVER_HAS_IMAGE =).*/\1 true/')
+          updated_content=$(echo "$existing_content" | sed -E 's/(APP_SERVER_IMAGE_TAG =)".*"/\1"'"${{ env.IMAGE_TAG }}\""/; s/(APP_SERVER_HAS_IMAGE =).*/\1 true/')
           echo "$updated_content" > Variables.tfvars
           git add Variables.tfvars
           git commit -m "Update Variables.tfvar for ${{ github.run_id }}${{ github.run_attempt }}"
