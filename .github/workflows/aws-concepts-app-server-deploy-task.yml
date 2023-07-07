@@ -35,12 +35,6 @@ jobs:
         run: |
           content=$(cat ../../../Infrastructure/AwsConceptsApp/Environments/${{ inputs.target-environment-name  }}/Ui.env)
           echo "$content" > .env
-      - name: Installing dependencies
-        run: npm install
-      - name: Building project
-        env:
-          NODE_OPTIONS: "--max_old_space_size=6096"
-        run: npm run build
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
