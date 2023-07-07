@@ -20,7 +20,7 @@ resource "aws_ecs_task_definition" "appserver" {
       portMappings = [
       {
         containerPort = var.APP_SERVER_HAS_IMAGE ? 3000 : 80,
-        hostPort      = 80,
+        hostPort      = var.APP_SERVER_HAS_IMAGE ? 3000 : 80,
         protocol      = "tcp"
       }
       ],
@@ -55,9 +55,9 @@ resource "aws_ecs_service" "appserver" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.appserver.arn
+    target_group_arn =  var.APP_SERVER_HAS_IMAGE ? aws_lb_target_group.appserver_port_3000[0].arn : aws_lb_target_group.appserver_port_80[0].arn
     container_name   = "${var.APPLICATION_NAME}-appserver1"
-    container_port   = 80
+    container_port   = var.APP_SERVER_HAS_IMAGE ? 3000 : 80
   }
 
   depends_on = [
