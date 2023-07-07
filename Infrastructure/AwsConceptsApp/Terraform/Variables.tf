@@ -32,6 +32,14 @@ variable "LAMBDA_API_BUILD_ID" {
   type = string
   default = "nothing here"
 }
+variable "APP_SERVER_HAS_IMAGE" {
+  type = bool
+  default = false
+}
+variable "APP_SERVER_IMAGE_TAG" {
+  type = string
+  default = "nothing here"
+}
 variable "GLOBALADMINS" {
   type = string
   default = "nothing here"

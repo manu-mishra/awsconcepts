@@ -83,7 +83,6 @@ jobs:
     uses: ./.github/workflows/aws-concepts-app-infra-deploy-task.yml
     with:
       environment-name: ${{inputs.target-environment-name }}
-      build-id: "${{ github.run_id }}${{ github.run_attempt }}"
       aws-region-name: ${{inputs.aws-region-name}}
     secrets: 
       role-to-assume: ${{secrets.role-to-assume}}

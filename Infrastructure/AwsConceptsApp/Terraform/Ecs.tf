@@ -16,14 +16,13 @@ resource "aws_ecs_task_definition" "appserver" {
   container_definitions = jsonencode([
     {
       name  = "${var.APPLICATION_NAME}-appserver1",
-      #image = "${aws_ecr_repository.app1.repository_url}:latest",
-      image = "nginxdemos/hello",
+      image = var.APP_SERVER_HAS_IMAGE ? "${aws_ecr_repository.app1.repository_url}:${var.APP_SERVER_IMAGE_TAG}" : "nginxdemos/hello",
       portMappings = [
-        {
-          containerPort = 80,
-          hostPort      = 80,
-          protocol      = "tcp"
-        }
+      {
+        containerPort = var.APP_SERVER_HAS_IMAGE ? 3000 : 80,
+        hostPort      = 80,
+        protocol      = "tcp"
+      }
       ],
       essential = true,
       logConfiguration = {
