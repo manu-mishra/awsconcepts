@@ -1,17 +1,16 @@
 resource "aws_cloudfront_distribution" "cf" {
   enabled             = true
   aliases             = ["${var.ENV_SUBDOMAIN}.${var.APEX_DOMAIN}","${var.ENV_SUBDOMAIN}.${var.APEX_DOMAIN}"]
-  default_root_object = "index.html"
   custom_error_response {
     error_code    = 403
     response_code = 200
-    response_page_path = "/index.html"
+    response_page_path = "/"
   }
 
   custom_error_response {
     error_code    = 404
     response_code = 200
-    response_page_path = "/index.html"
+    response_page_path = "/"
   }
   origin {
   domain_name = aws_lb.application.dns_name
