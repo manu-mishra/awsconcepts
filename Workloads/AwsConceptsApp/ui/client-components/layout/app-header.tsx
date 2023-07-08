@@ -32,11 +32,10 @@ export const AppHeader = () => {
       </nav>
 
       <div className="header-right">
-        <button>Sign In</button>
-        <button>Sign Out</button>
+        <button className="button-primary">Sign In</button>
+        <button className="button-secondary">Sign Out</button>
         <img src="path-to-user-persona.png" alt="User Persona" />
       </div>
     </header>
   )
 }
-
