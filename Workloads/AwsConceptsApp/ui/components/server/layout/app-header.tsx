@@ -1,6 +1,7 @@
 import React from 'react';
 import AppLogo from '../header/AppLogo'
 import {AppHeaderRight} from '../header/AppHeaderRight'
+import ErrorBoundary from '../../client/ErrorBoundary';
 
 export const AppHeader = () => {
   return (
@@ -18,7 +19,9 @@ export const AppHeader = () => {
       </nav> */}
 
       <div className="header-right">
+        <ErrorBoundary>
         <AppHeaderRight></AppHeaderRight>
+        </ErrorBoundary>
       </div>
     </header>
   )
