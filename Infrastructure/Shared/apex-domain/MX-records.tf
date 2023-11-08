@@ -5,6 +5,6 @@ resource "aws_route53_record" "mx_record" {
   ttl     = "3600"
 
   records = [
-    "10 awsconcepts-com.mail.protection.outlook.com."
+    "0 awsconcepts-com.mail.protection.outlook.com."
   ]
 }
