@@ -4,6 +4,7 @@ resource "aws_route53_record" "txt_record" {
   type    = "TXT"
   ttl     = "3600"
   
-  # Text verification record for Microsoft Entra DOmain Verification
-  records = ["\"MS=ms50990525\""]
+  records = [
+    "MS=ms50990525"#Text verification record for Microsoft Entra Domain Verification
+    ]
 }
