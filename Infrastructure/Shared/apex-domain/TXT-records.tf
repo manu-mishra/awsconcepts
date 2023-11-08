@@ -5,6 +5,7 @@ resource "aws_route53_record" "txt_record" {
   ttl     = "3600"
   
   records = [
-    "MS=ms50990525"#Text verification record for Microsoft Entra Domain Verification
+    "MS=ms50990525",#Text verification record for Microsoft Entra Domain Verification
+    "v=spf1 include:spf.protection.outlook.com -all"
     ]
 }
